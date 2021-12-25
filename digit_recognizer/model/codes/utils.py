@@ -4,6 +4,22 @@
 
 
 import tensorflow as tf
+import pandas as pd
+
+
+def data_splitting(original_data: pd.DataFrame):
+    """Splits the data into training, validation, and testing dataframes.
+
+        Args:
+            original_data: The dataframe which contains pixel details for all the images in the original training data.
+
+        Returns:
+            A tuple which dataframes for new splits of training, validation and testing data.
+    """
+    new_test_data = original_data.iloc[:1000]
+    new_validation_data = original_data.iloc[1000:2000]
+    new_train_data = original_data.iloc[2000:]
+    return new_train_data, new_validation_data, new_test_data
 
 
 def loss_function(actual_values: tf.Tensor,
@@ -27,5 +43,3 @@ def loss_function(actual_values: tf.Tensor,
     mask = tf.cast(mask, dtype=loss_.dtype)
     loss_ *= mask
     return tf.reduce_mean(loss_)
-
-
