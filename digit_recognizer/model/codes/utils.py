@@ -50,6 +50,24 @@ def data_preprocessing(new_data: pd.DataFrame):
     return new_input_data, new_target_data
 
 
+def data_slicing(input_data: tf.Tensor,
+                 target_data: tf.Tensor,
+                 batch_size: int):
+    """Performs data slicing by combining the input & target data, and slices data based on the batch size.
+
+        Args:
+            input_data: A tensor which contains the input image data
+            target_data: A tensor which contains the target labels data
+            batch_size: Size of each batch used for training and testing the model.
+
+        Returns:
+            A combined dataset of the input and target which is sliced based on batch size.
+    """
+    new_dataset = tf.data.Dataset.from_tensor_slices((input_data, target_data)).shuffle(len(input_data))
+    new_dataset = new_dataset.batch(batch_size, drop_remainder=True)
+    return new_dataset
+
+
 def loss_function(actual_values: tf.Tensor,
                   predicted_values: tf.Tensor):
     """Calculates loss for the current batch of actual values and the predicted values.
