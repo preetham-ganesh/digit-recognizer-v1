@@ -8,6 +8,8 @@ import pandas as pd
 from sklearn.utils import shuffle
 import numpy as np
 import sys
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
 
 
 def data_splitting(original_data: pd.DataFrame):
@@ -120,6 +122,41 @@ def choose_model(model_number: int):
     return model
 
 
+def generate_model_history_plot(train_metrics: list,
+                                validation_metrics: list,
+                                metric_type: str,
+                                model: int):
+    """Generates plot for model training and validation history.
+
+        Args:
+            train_metrics: Training performance of the model for the current metric type.
+            validation_metrics: Validation performance of the model for the current metric type.
+            metric_type: String which will have either loss or accuracy as its value.
+            model: Integer which decides the model to be trained.
+
+        Returns:
+            None
+    """
+    # Specifications used to generate the plot, i.e., font size and size of the plot.
+    font = {'size': 28}
+    plt.rc('font', **font)
+    figure(num=None, figsize=(20, 10))
+
+    # Generates plot for training and validation metrics
+    epochs = [i for i in range(1, len(train_metrics) + 1)]
+    plt.plot(epochs, train_metrics, color='orange', linewidth=3, label='train_{}'.format(metric_type))
+    plt.plot(epochs, validation_metrics, color='blue', linewidth=3, label='validation_{}'.format(metric_type))
+
+    # Generates the plot for the epochs vs metrics.
+    plt.xlabel('epochs')
+    plt.ylabel('normalized_rainfall')
+    plt.legend(loc='upper left')
+    plt.xticks(range(1, len(epochs) + 1), epochs)
+    plt.grid(color='black', linestyle='-.', linewidth=2, alpha=0.3)
+    plt.savefig('../results/model_{}/model_history_{}.png'.format(model, metric_type))
+    plt.show()
+
+
 def model_training_and_evaluation(new_train_input_data: tf.Tensor,
                                   new_train_target_data: tf.Tensor,
                                   new_validation_input_data: tf.Tensor,
@@ -159,11 +196,14 @@ def model_training_and_evaluation(new_train_input_data: tf.Tensor,
                         epochs=configuration['epochs'], verbose=2, callbacks=model_checkpoint_callback,
                         validation_data=(new_validation_input_data, new_validation_target_data))
     print()
-    print(history.history)
-    print()
+
+    # Generates plot for model training and validation history.
+    generate_model_history_plot(history.history['loss'], history.history['val_loss'], 'loss', configuration['model'])
+    generate_model_history_plot(history.history['accuracy'], history.history['val_accuracy'], 'accuracy',
+                                configuration['model'])
 
     # Evaluates the model using the testing data.
-    test_score = model.evaluate(new_test_input_data, new_test_target_data)
+    test_score = model.evaluate(new_test_input_data, new_test_target_data, verbose=0)
     print('Test loss: {}'.format(round(test_score[0], 3)))
     print('Test accuracy: {}'.format(round(test_score[1], 3)))
     print()
