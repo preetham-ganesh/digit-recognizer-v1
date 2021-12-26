@@ -29,25 +29,29 @@ def data_splitting(original_data: pd.DataFrame):
     return new_train_data, new_validation_data, new_test_data
 
 
-def data_preprocessing(new_data: pd.DataFrame):
+def data_preprocessing(new_input_data: pd.DataFrame):
     """Converts new split dataframe into input and target data. Performs data transformation on the new input data.
 
         Args:
-            new_data: New split dataframe which contains the label and pixel values for the image.
+            new_input_data: New split dataframe which contains the label and pixel values for the image.
 
         Returns:
             A tuple which contains 2 Tensors for the new_input_data and new_target_data.
     """
-    # Splits the data into the input and target data
-    new_input_data = new_data.drop(columns=['label'])
-    new_target_data = list(new_data['label'])
+    if 'label' in new_input_data.columns():
+        # Splits the data into the input and target data
+        new_input_data = new_input_data.drop(columns=['label'])
+        new_target_data = list(new_input_data['label'])
 
     # Reshapes the input data, converts into float32 format, normalizes the pixel values and converts to tensor.
     new_input_data = np.array(new_input_data).reshape((len(new_input_data), 28, 28, 1)).astype('float32') / 255
     new_input_data = tf.convert_to_tensor(new_input_data)
 
-    new_target_data = tf.convert_to_tensor(new_target_data)
-    return new_input_data, new_target_data
+    if 'label' in new_input_data.columns():
+        new_target_data = tf.keras.utils.to_categorical(new_target_data)
+        return new_input_data, new_target_data
+
+    return new_input_data
 
 
 def digit_recognizer_1():
