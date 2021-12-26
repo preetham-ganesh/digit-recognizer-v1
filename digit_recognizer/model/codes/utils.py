@@ -52,22 +52,38 @@ def data_preprocessing(new_data: pd.DataFrame):
     return new_input_data, new_target_data
 
 
-def data_slicing(input_data: tf.Tensor,
-                 target_data: tf.Tensor,
-                 batch_size: int):
-    """Performs data slicing by combining the input & target data, and slices data based on the batch size.
+def digit_recognizer_1():
+    """Sequential model for the 1st configuration of hyperparameters used for developing the Digit Recognizer.
 
         Args:
-            input_data: A tensor which contains the input image data
-            target_data: A tensor which contains the target labels data
-            batch_size: Size of each batch used for training and testing the model.
+            None
 
         Returns:
-            A combined dataset of the input and target which is sliced based on batch size.
+            Tensorflow compiled model for the 1st configuration of hyperparameters.
     """
-    new_dataset = tf.data.Dataset.from_tensor_slices((input_data, target_data)).shuffle(len(input_data))
-    new_dataset = new_dataset.batch(batch_size, drop_remainder=True)
-    return new_dataset
+    model = tf.keras.models.Sequential()
+    model.add(tf.keras.layers.Conv2D(filters=8, kernel_size=4, padding='valid', strides=1, activation='relu',
+                                     input_shape=(28, 28, 1)))
+    model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=2, padding='valid'))
+    model.add(tf.keras.layers.Conv2D(filters=16, kernel_size=4, padding='valid', strides=1, activation='relu'))
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=2, padding='valid'))
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(units=128, activation='relu'))
+    model.add(tf.keras.layers.Dense(units=64, activation='relu'))
+    model.add(tf.keras.layers.Dense(units=10, activation='softmax'))
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+
+def digit_recognizer_2():
+    """Sequential model for the 1st configuration of hyperparameters used for developing the Digit Recognizer.
+
+        Args:
+            None
+
+        Returns:
+            Tensorflow compiled model for the 1st configuration of hyperparameters.
+    """
 
 
 def choose_model(model_number: int):
@@ -89,51 +105,3 @@ def choose_model(model_number: int):
     return model
 
 
-def loss_function(actual_values: tf.Tensor,
-                  predicted_values: tf.Tensor):
-    """Calculates loss for the current batch of actual values and the predicted values.
-
-        Args:tr
-            actual_values: Actual classes the images belong to.
-            predicted_values: Classes predicted by the neural network model for each image in batch.
-
-        Return:
-            Loss value computed for the current batch.
-    """
-    # Initializes the object for calculating the loss.
-    loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
-
-    # Mask off the losses on padding and computes the loss.
-    mask = tf.math.logical_not(tf.math.equal(actual_values, 0))
-    loss_ = loss_object(actual_values, predicted_values)
-    mask = tf.cast(mask, dtype=loss_.dtype)
-    loss_ *= mask
-    return tf.reduce_mean(loss_)
-
-
-@tf.function
-def train_step(input_data: tf.Tensor,
-               target_data: tf.Tensor,
-               model,
-               optimizer,
-               train_loss,
-               train_accuracy):
-    with tf.GradientTape() as tape:
-        predicted_data = model(input_data, True)
-    loss = loss_function(target_data, predicted_data)
-    gradients = tape.gradient(loss, model.variables)
-    optimizer.apply_gradients(zip(gradients, model.variables))
-    train_loss(loss)
-    train_accuracy(target_data, predicted_data)
-
-
-def model_training(train_dataset: tf.Tensor,
-                   validation_dataset: tf.Tensor,
-                   configuration: dict):
-    train_loss = tf.keras.metrics.Mean(name='train_loss')
-    validation_loss = tf.keras.metrics.Mean(name='validation_loss')
-    train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
-    validation_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='validation_accuracy')
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
-    model_checkpoint_path = '{}_{}/{}'.format('../results/model', configuration['model'], 'training_checkpoints')
-    checkpoint = tf.train.checkpoint(optimizer=optimizer, model=model)
