@@ -7,7 +7,6 @@ import tensorflow as tf
 import pandas as pd
 from sklearn.utils import shuffle
 import numpy as np
-from models import DigitRecognizer1, DigitRecognizer2
 import sys
 
 
@@ -43,11 +42,10 @@ def data_preprocessing(new_data: pd.DataFrame):
     new_input_data = new_data.drop(columns=['label'])
     new_target_data = list(new_data['label'])
 
-    # Reshapes the input data, converts into float32 format and normalizes the pixel values.
+    # Reshapes the input data, converts into float32 format, normalizes the pixel values and converts to tensor.
     new_input_data = np.array(new_input_data).reshape((len(new_input_data), 28, 28, 1)).astype('float32') / 255
-
-    # Converts the input and target data into Tensorflow tensors.
     new_input_data = tf.convert_to_tensor(new_input_data)
+
     new_target_data = tf.convert_to_tensor(new_target_data)
     return new_input_data, new_target_data
 
@@ -76,14 +74,25 @@ def digit_recognizer_1():
 
 
 def digit_recognizer_2():
-    """Sequential model for the 1st configuration of hyperparameters used for developing the Digit Recognizer.
+    """Sequential model for the 2nd configuration of hyperparameters used for developing the Digit Recognizer.
 
         Args:
             None
 
         Returns:
-            Tensorflow compiled model for the 1st configuration of hyperparameters.
+            Tensorflow compiled model for the 2nd configuration of hyperparameters.
     """
+    model = tf.keras.models.Sequential()
+    model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)))
+    model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(4, 4), activation='relu'))
+    model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2)))
+    model.add(tf.keras.layers.dropout(rate=0.25))
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(units=128, activation='relu'))
+    model.add(tf.keras.layers.dropout(rate=0.5))
+    model.add(tf.keras.layers.Dense(units=10, activation='softmax'))
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
 
 
 def choose_model(model_number: int):
@@ -96,9 +105,9 @@ def choose_model(model_number: int):
             Object for the Digit Recognizer model class.
     """
     if model_number == 1:
-        model = DigitRecognizer1()
+        model = digit_recognizer_1()
     elif model_number == 2:
-        model = DigitRecognizer2()
+        model = digit_recognizer_2()
     else:
         print('The model number entered is incorrect. Kindly enter the right model number')
         sys.exit()
