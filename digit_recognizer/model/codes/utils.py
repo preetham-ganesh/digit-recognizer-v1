@@ -185,8 +185,8 @@ def model_training_and_evaluation(new_train_input_data: tf.Tensor,
 
     # Creates model checkpoint callback to monitor and save best model.
     directory_path = '../results'
-    checkpoint_directory = '{}/{}_{}/{}/{}'.format(directory_path, 'model', configuration['model'],
-                                                   'checkpoint_directory', 'checkpoint')
+    checkpoint_directory = '{}/{}_{}/{}'.format(directory_path, 'model', configuration['model'],
+                                                'checkpoint_directory/checkpoint')
     model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_directory,
                                                                    save_weights_only=True, monitor='val_loss',
                                                                    mode='min', verbose=1)
@@ -206,6 +206,29 @@ def model_training_and_evaluation(new_train_input_data: tf.Tensor,
     test_score = model.evaluate(new_test_input_data, new_test_target_data, verbose=0)
     print('Test loss: {}'.format(round(test_score[0], 3)))
     print('Test accuracy: {}'.format(round(test_score[1], 3)))
-    print()
 
 
+def predict(model_number: int,
+            images: tf.Tensor):
+    """Predicts the labels for the images given as input by using the model_number to restore the corresponding weights.
+
+        Args:
+            model_number: Integer that decides which model's weights has to be restored.
+            images: Transformed input image data.
+
+        Returns:
+             A list which contains the labels for all the images given as input.
+    """
+    # Chooses the model based model_number.
+    model = choose_model(model_number)
+
+    # Restores weights of the model based on the model_number.
+    directory_path = '../results'
+    checkpoint_directory = '{}/{}_{}/{}'.format(directory_path, 'model', model_number,
+                                                'checkpoint_directory/checkpoint')
+    model.load_weights(checkpoint_directory)
+
+    # Performs predictions based on the trained model and saves the index of maximum value for each image.
+    predictions = model.predict(images)
+    predicted_labels = [np.argmax(predictions[i]) for i in range(len(predictions))]
+    return predicted_labels
