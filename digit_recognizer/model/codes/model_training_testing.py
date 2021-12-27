@@ -41,7 +41,7 @@ def main():
     print('{}: {}'.format('Shape of new target testing data', new_test_target_data.shape))
     print()
     batch_size = 64
-    configuration = {'batch_size': batch_size, 'epochs': 100, 'model': 1}
+    configuration = {'batch_size': batch_size, 'epochs': 100, 'model': 2}
     print()
     print('Model Training Started')
     print()
