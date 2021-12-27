@@ -232,3 +232,19 @@ def predict(model_number: int,
     predictions = model.predict(images)
     predicted_labels = [np.argmax(predictions[i]) for i in range(len(predictions))]
     return predicted_labels
+
+
+def create_submission(predicted_labels: list):
+    """Creates a pandas dataframe based on the predicted_labels and converts it into a CSV file.
+
+        Args:
+            predicted_labels: A list which contains the labels for all the images given as input.
+
+        Returns:
+            None.
+    """
+    submission_dict = dict()
+    submission_dict['ImageId'] = [i for i in range(1, len(predicted_labels) + 1)]
+    submission_dict['Label'] = predicted_labels
+    submission = pd.DataFrame(submission_dict, columns=['ImageId', 'Label'])
+    submission.to_csv('../results/submission.csv', index=False)
