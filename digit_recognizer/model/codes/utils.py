@@ -94,10 +94,10 @@ def digit_recognizer_2():
     model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)))
     model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(4, 4), activation='relu'))
     model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2)))
-    model.add(tf.keras.layers.dropout(rate=0.25))
+    model.add(tf.keras.layers.Dropout(rate=0.25))
     model.add(tf.keras.layers.Flatten())
     model.add(tf.keras.layers.Dense(units=128, activation='relu'))
-    model.add(tf.keras.layers.dropout(rate=0.5))
+    model.add(tf.keras.layers.Dropout(rate=0.5))
     model.add(tf.keras.layers.Dense(units=10, activation='softmax'))
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     return model
@@ -151,7 +151,6 @@ def generate_model_history_plot(train_metrics: list,
     plt.xlabel('epochs')
     plt.ylabel('normalized_rainfall')
     plt.legend(loc='upper left')
-    plt.xticks(range(1, len(epochs) + 1), epochs)
     plt.grid(color='black', linestyle='-.', linewidth=2, alpha=0.3)
     plt.savefig('../results/model_{}/model_history_{}.png'.format(model, metric_type))
     plt.show()
@@ -190,10 +189,13 @@ def model_training_and_evaluation(new_train_input_data: tf.Tensor,
     model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_directory,
                                                                    save_weights_only=True, monitor='val_loss',
                                                                    mode='min', verbose=1)
+    model_early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.0005, patience=5, verbose=1,
+                                                            mode='min', restore_best_weights=False)
 
     # Trains model using the training data, validates using the validation data, & uses callback to save the best model.
     history = model.fit(x=new_train_input_data, y=new_train_target_data, batch_size=configuration['batch_size'],
-                        epochs=configuration['epochs'], verbose=2, callbacks=model_checkpoint_callback,
+                        epochs=configuration['epochs'], verbose=2,
+                        callbacks=[model_checkpoint_callback, model_early_stopping],
                         validation_data=(new_validation_input_data, new_validation_target_data))
     print()
 
