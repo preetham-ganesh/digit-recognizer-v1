@@ -211,12 +211,14 @@ def model_training_and_evaluation(new_train_input_data: tf.Tensor,
 
 
 def predict(model_number: int,
-            images: tf.Tensor):
+            images: tf.Tensor,
+            directory_path: str):
     """Predicts the labels for the images given as input by using the model_number to restore the corresponding weights.
 
         Args:
             model_number: Integer that decides which model's weights has to be restored.
             images: Transformed input image data.
+            directory_path: Parent folder where the model checkpoint can be found.
 
         Returns:
              A list which contains the labels for all the images given as input.
@@ -225,7 +227,6 @@ def predict(model_number: int,
     model = choose_model(model_number)
 
     # Restores weights of the model based on the model_number.
-    directory_path = '../results'
     checkpoint_directory = '{}/{}_{}/{}'.format(directory_path, 'model', model_number,
                                                 'checkpoint_directory/checkpoint')
     model.load_weights(checkpoint_directory)
