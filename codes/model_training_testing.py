@@ -8,6 +8,7 @@ import os
 import logging
 import pandas as pd
 from utils import data_splitting, data_preprocessing, model_training_and_evaluation, predict, create_submission
+import sys
 
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -41,7 +42,7 @@ def main():
     print('{}: {}'.format('Shape of new target testing data', new_test_target_data.shape))
     print()
     batch_size = 64
-    configuration = {'batch_size': batch_size, 'epochs': 100, 'model': 2}
+    configuration = {'batch_size': batch_size, 'epochs': 100, 'model': int(sys.argv[1])}
     print()
     print('Model Training Started')
     print()
@@ -50,7 +51,7 @@ def main():
                                   configuration)
     print()
     original_test_input_data = data_preprocessing(original_test_data)
-    predicted_labels = predict(configuration['model'], original_test_input_data)
+    predicted_labels = predict(configuration['model'], original_test_input_data, '../results')
     create_submission(predicted_labels)
 
 
