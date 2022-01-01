@@ -1,0 +1,5 @@
+name: forq_env
+
+dependencies:
+	- pip
+	- python
