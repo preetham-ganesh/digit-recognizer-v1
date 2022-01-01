@@ -65,7 +65,7 @@ python3 model_training_testing.py 2
 A video demonstration on how to run the application is shown below:
 
 <!-- ![Video Demonstration](demo/demo.gif) -->
-<img src="demo/demo.gif" alt="Video Demonstration" height="600px">
+<img src="demo/demo.gif" alt="Video Demonstration" height="500px">
 
 ## Future Work
 
