@@ -1,0 +1,8 @@
+pandas
+os
+scikit-learn
+matplotlib
+numpy
+sys
+tensorflow-gpu
+logging
