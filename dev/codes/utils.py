@@ -86,3 +86,25 @@ def log_information(log: str) -> None:
     except NameError:
         _ = ""
     print(log)
+
+
+def save_json_file(dictionary: dict, file_name: str, directory_path: str) -> None:
+    """Converts a dictionary into a JSON file and saves it for future use.
+
+    Args:
+        dictionary: A dictionary which needs to be saved.
+        file_name: A string which contains the name with which the file has to be saved.
+        directory_path: A string which contains the path where the file needs to be saved.
+
+    Returns:
+        None.
+    """
+    # Creates the following directory path if it does not exist.
+    directory_path = check_directory_path_existence(directory_path)
+
+    # Saves the dictionary or list as a JSON file at the file path location.
+    file_path = '{}/{}.json'.format(directory_path, file_name)
+    with open(file_path, 'w') as out_file:
+        json.dump(dictionary, out_file, indent=4)
+    out_file.close()
+    log_information('{} file saved successfully at {}.'.format(file_name, file_path))
