@@ -59,3 +59,22 @@ class DigitRecognizer(tf.keras.Model):
             # If layer's name is like 'globalaveragepool2d_', a Global Average Pooling 2D layer is initialized.
             elif layer_name.split('_')[0] == 'globalaveragepool2d':
                 self.model_layers[layer_name] = tf.keras.layers.GlobalAveragePooling2D()
+    
+    def call(self, x: tf.Tensor, training: bool) -> tf.Tensor:
+        """Input tensor is passed through the layers in the encoder model."""
+
+        # Iterates across the layers arrangement, and predicts the output for each layer.
+        for layer_index in range(
+                self.model_configuration['layers_start_index'], len(self.model_configuration['layers_arrangement'])
+            ):
+            layer_name = self.model_configuration['layers_arrangement'][layer_index]
+
+            # If layer's name is like 'dropout_' or 'batchnorm_' or 'mobilenet_', the following output is predicted.
+            if layer_name.split('_')[0] == 'dropout':
+                x = self.model_layers[layer_name](x, training=training)
+            
+            # Else, the following output is predicted.
+            else:
+                x = self.model_layers[layer_name](x)
+        return x
+    
