@@ -6,7 +6,7 @@
 import tensorflow as tf
 
 
-class DigitRecognizer(tf.keras.Model):
+class DigitRecognition(tf.keras.Model):
     """Recognizes number in an image.
 
     Attributes:
