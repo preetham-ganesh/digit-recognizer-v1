@@ -108,3 +108,20 @@ def save_json_file(dictionary: dict, file_name: str, directory_path: str) -> Non
         json.dump(dictionary, out_file, indent=4)
     out_file.close()
     log_information('{} file saved successfully at {}.'.format(file_name, file_path))
+
+
+def load_json_file(file_name: str, directory_path: str) -> dict:
+    """Loads a JSON file into memory based on the file_name.
+
+    Args:
+        file_name: A string which contains the name of the of the file to be loaded.
+        directory_path: A string which contains the location where the directory path exists.
+
+    Returns:
+        A dictionary which contains the JSON file.
+    """
+    file_path = '{}/{}.json'.format(directory_path, file_name)
+    with open(file_path, 'r') as out_file:
+        dictionary = json.load(out_file)
+    out_file.close()
+    return dictionary
