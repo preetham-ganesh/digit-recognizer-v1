@@ -320,3 +320,40 @@ def validation_step(input_batch: tf.Tensor, target_batch: tf.Tensor) -> None:
     # Computes mean for loss & accuracy.
     validation_loss(batch_loss)
     validation_accuracy(batch_accuracy)
+
+
+def generate_model_history_plot(split_history_dataframe: pd.DataFrame, metric_name: str, version: str) -> None:
+    """Generates plot for model training and validation history.
+    Args:
+        split_history_dataframe: A Pandas dataframe which contains model training and validation performance history.
+        metric_name: A string which contains the current metric name.
+        version: A string which contains the current version of the model.
+    Returns:
+        None.
+    """
+    # Specifications used to generate the plot, i.e., font size and size of the plot.
+    font = {'size': 28}
+    plt.rc('font', **font)
+    figure(num=None, figsize=(30, 15))
+
+    # Converts train and validation metrics from string format to floating point format.
+    epochs = [i for i in range(1, len(split_history_dataframe) + 1)]
+    train_metrics = list(split_history_dataframe['train_{}'.format(metric_name)])
+    train_metrics = [float(train_metrics[i]) for i in range(len(train_metrics))]
+    validation_metrics = list(split_history_dataframe['validation_{}'.format(metric_name)])
+    validation_metrics = [float(validation_metrics[i]) for i in range(len(validation_metrics))]
+
+    # Generates plot for training and validation metrics
+    plt.plot(epochs, train_metrics, color='orange', linewidth=3, label='train_{}'.format(metric_name))
+    plt.plot(epochs, validation_metrics, color='blue', linewidth=3, label='validation_{}'.format(metric_name))
+
+    # Generates the plot for the epochs vs metrics.
+    plt.xlabel('epochs')
+    plt.ylabel(metric_name)
+    plt.legend(loc='upper left')
+    plt.grid(color='black', linestyle='-.', linewidth=2, alpha=0.3)
+
+    # Saves plot using the following path.
+    home_directory_path = os.path.dirname(os.getcwd())
+    plt.savefig('{}/results/v{}/utils/model_history_{}.png'.format(home_directory_path, version, metric_name))
+    plt.close()
