@@ -15,9 +15,7 @@ class DigitRecognition(tf.keras.Model):
     """
 
     def __init__(self, model_configuration: dict) -> None:
-        """Initializes the layers in the recognition model, by adding convolutional, pooling, dropout & dense
-        layers.
-        """
+        """Initializes the layers in the recognition model, by adding convolutional, pooling, dropout & dense layers."""
 
         super(DigitRecognition, self).__init__()
         self.model_configuration = model_configuration
@@ -37,14 +35,16 @@ class DigitRecognition(tf.keras.Model):
                     padding=current_layer_configuration["padding"],
                     strides=current_layer_configuration["strides"],
                     activation=current_layer_configuration["activation"],
-                    kernel_initializer=current_layer_configuration["kernel_initializer"]
+                    kernel_initializer=current_layer_configuration[
+                        "kernel_initializer"
+                    ],
                 )
 
             # If layer's name is like 'maxpool2d_', a MaxPool2D layer is initialized based on layer configuration.
             elif layer_name.split("_")[0] == "maxpool2d":
                 self.model_layers[layer_name] = tf.keras.layers.MaxPool2D(
                     pool_size=current_layer_configuration["pool_size"],
-                    strides=current_layer_configuration["strides"]
+                    strides=current_layer_configuration["strides"],
                 )
 
             # If layer's name is like 'dropout_', a Dropout layer is initialized based on layer configuration.
@@ -57,7 +57,7 @@ class DigitRecognition(tf.keras.Model):
             elif layer_name.split("_")[0] == "dense":
                 self.model_layers[layer_name] = tf.keras.layers.Dense(
                     units=current_layer_configuration["units"],
-                    activation=current_layer_configuration["activation"]
+                    activation=current_layer_configuration["activation"],
                 )
 
             # If layer's name is like 'flatten_', a Flatten layer is initialized.
@@ -93,7 +93,7 @@ class DigitRecognition(tf.keras.Model):
             shape=(
                 self.model_configuration["final_image_size"],
                 self.model_configuration["final_image_size"],
-                self.model_configuration["n_channels"]
+                self.model_configuration["n_channels"],
             )
         )
 
