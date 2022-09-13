@@ -406,11 +406,13 @@ def model_training_validation(
     model_configuration: dict,
 ) -> None:
     """Trains and validates the current configuration of the model using the train and validation dataset.
+
     Args:
         train_dataset: A TensorFlow dataset which contains sliced input and target tensors for the Training data split.
         validation_dataset: A TensorFlow dataset which contains sliced input and target tensors for the Validation data
             split.
         model_configuration: A dictionary which contains current model configuration details.
+    
     Returns:
         None.
     """
