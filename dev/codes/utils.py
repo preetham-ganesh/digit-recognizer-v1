@@ -211,3 +211,20 @@ def shuffle_slice_dataset(input_data: list, target_data: list, batch_size: int) 
     # Slices the combined dataset based on batch size, and drops remainder values.
     dataset = dataset.batch(batch_size, drop_remainder=True)
     return dataset
+
+
+def process_input_batch(input_batch: tf.Tensor) -> tf.Tensor:
+    """Processes input batch normalizing the pixel value range, and type casting them to float32 type.
+
+    Args:
+        input_batch: A tensor which contains the input images from the current batch for training the model.
+    
+    Returns:
+        A tensor which contains the processed input batch.
+    """
+    # Casts input and target batches to float32 type.
+    input_batch = tf.cast(input_batch, dtype=tf.float32)
+
+    # Normalizes the input and target batches from [0, 255] range to [0, 1] range.
+    input_batch = input_batch / 255.0
+    return input_batch
