@@ -18,7 +18,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 import pandas as pd
-import time
+from sklearn.utils import shuffle
 
 from model import DigitRecognition
 
@@ -142,3 +142,24 @@ def load_dataset() -> tuple:
     original_train_data = pd.read_csv('{}/data/original/train.csv'.format(home_directory_path))
     original_test_data = pd.read_csv('{}/data/original/test.csv'.format(home_directory_path))
     return original_train_data, original_test_data
+
+
+def data_splitting(original_data: pd.DataFrame, n_validation_examples: int, n_test_examples: int) -> tuple:
+    """Splits the data into training, validation, and testing dataframes.
+    
+    Args:
+        original_data: The dataframe which contains pixel details for all the images in the original training data.
+        n_validation_examples: An integer which contains number of examples in validation dataset.
+        n_test_examples: An integer which contains number of examples in test dataset.
+    
+    Returns:
+        A tuple which dataframes for new splits of training, validation and testing data.
+    """
+    # Shuffles the dataframe.
+    original_data = shuffle(original_data)
+
+    # Splits the original dataframe into training, validation and testing data.
+    new_test_data = original_data.iloc[:n_test_examples]
+    new_validation_data = original_data.iloc[n_test_examples:n_validation_examples + n_test_examples]
+    new_train_data = original_data.iloc[n_validation_examples + n_test_examples:]
+    return new_train_data, new_validation_data, new_test_data
