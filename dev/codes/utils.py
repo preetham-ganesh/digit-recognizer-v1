@@ -244,3 +244,18 @@ def loss_function(target_batch: tf.Tensor, predicted_batch: tf.Tensor) -> tf.Ten
     loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
     current_loss = loss_object(target_batch, predicted_batch)
     return current_loss
+
+
+def accuracy_function(target_batch: tf.Tensor, predicted_batch: tf.Tensor):
+    """Computes the accuracy value for the current batch of the predicted values based on comparison with actual values.
+
+    Args:
+        target_batch: A tensor which contains the actual values for the current batch.
+        predicted_batch: A tensor which contains the predicted values for the current batch.
+    
+    Returns:
+        A tensor which contains accuracy for the current batch.
+    """
+    # Computes loss for the current batch using actual values and predicted values.
+    accuracy = tf.keras.metrics.categorical_accuracy(target_batch, predicted_batch)
+    return tf.reduce_mean(accuracy)
