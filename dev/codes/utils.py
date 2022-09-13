@@ -125,3 +125,20 @@ def load_json_file(file_name: str, directory_path: str) -> dict:
         dictionary = json.load(out_file)
     out_file.close()
     return dictionary
+
+
+def load_dataset() -> tuple:
+    """Loads original Kaggle Digit Recognizer dataset.
+
+    Args:
+        None.
+    
+    Returns:
+        A tuple which contains original train and test data downloaded from Kaggle website.
+    """
+    home_directory_path = os.path.dirname(os.getcwd())
+
+    # Loads the original Kaggle data.
+    original_train_data = pd.read_csv('{}/data/original/train.csv'.format(home_directory_path))
+    original_test_data = pd.read_csv('{}/data/original/test.csv'.format(home_directory_path))
+    return original_train_data, original_test_data
