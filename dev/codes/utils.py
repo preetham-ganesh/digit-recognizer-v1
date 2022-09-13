@@ -176,7 +176,7 @@ def data_preprocessing(new_data: pd.DataFrame):
         A tuple which contains 2 Tensors for the new_input_data and new_target_data.
     """
     if 'label' in list(new_data.columns):
-        
+
         # Splits the data into the input and target data
         new_input_data = new_data.drop(columns=['label'])
         new_target_data = list(new_data['label'])
@@ -184,11 +184,30 @@ def data_preprocessing(new_data: pd.DataFrame):
         new_input_data = new_data
 
     # Reshapes the input data, converts into float32 format, normalizes the pixel values and converts to tensor.
-    new_input_data = np.array(new_input_data).reshape((len(new_input_data), 28, 28, 1)).astype('float32') / 255
-    new_input_data = tf.convert_to_tensor(new_input_data)
+    new_input_data = np.array(new_input_data).reshape((len(new_input_data), 28, 28, 1))
+    new_input_data = tf.convert_to_tensor(new_input_data, dtype='uint8')
 
     if 'label' in list(new_data.columns):
         new_target_data = tf.keras.utils.to_categorical(new_target_data)
         return new_input_data, new_target_data
 
     return new_input_data
+
+
+def shuffle_slice_dataset(input_data: list, target_data: list, batch_size: int) -> tf.data.Dataset:
+    """Converts the input data and target data into tensorflow dataset and slices them based on batch size.
+
+    Args:
+        input_data: A list which contains the current data split's resized input images.
+        target_data: A list which contains the current data split's resized target images.
+        batch_size: An integer which contains batch size for slicing the dataset into small chunks.
+    
+    Returns:
+        A TensorFlow dataset which contains sliced input and target tensors for the current data split.
+    """
+    # Zip input and output tensors into a single dataset and shuffles it.
+    dataset = tf.data.Dataset.from_tensor_slices((input_data, target_data)).shuffle(len(input_data))
+
+    # Slices the combined dataset based on batch size, and drops remainder values.
+    dataset = dataset.batch(batch_size, drop_remainder=True)
+    return dataset
