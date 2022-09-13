@@ -259,3 +259,39 @@ def accuracy_function(target_batch: tf.Tensor, predicted_batch: tf.Tensor):
     # Computes loss for the current batch using actual values and predicted values.
     accuracy = tf.keras.metrics.categorical_accuracy(target_batch, predicted_batch)
     return tf.reduce_mean(accuracy)
+
+
+@tf.function
+def train_step(input_batch: tf.Tensor, target_batch: tf.Tensor, optimizer: tf.keras.optimizers.Optimizer) -> None:
+    """Trains the convolutional neural network model using the current input and target training batches. Predicts the 
+        output for the current input batch, computes loss on comparison with the target batch, and optimizes the model 
+        based on the computed loss.
+    
+    Args:
+        input_batch: A tensor which contains the input images from the current batch for training the model.
+        target_batch: A tensor which contains the target images from the current batch for training and validating the 
+            model.
+        optimizer: An tensorflow optimizer object which contains optimizing algorithm used improve the performance of 
+            the model.
+    
+    Returns:
+        None.
+    """
+    # Processes input batch for training the model.
+    input_batch = process_input_batch(input_batch)
+
+    # Computes masked images for all input images in the batch, and computes batch loss.
+    with tf.GradientTape() as tape:
+        predicted_batch = model(input_batch, True)
+        batch_loss = loss_function(target_batch, predicted_batch)
+
+    # Computes gradients using loss & model variables. Apply the computed gradients on model variables using optimizer.
+    gradients = tape.gradient(batch_loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+    # Computes accuracy score for the current batch.
+    batch_accuracy = accuracy_function(target_batch, predicted_batch)
+
+    # Computes mean for loss and accuracy.
+    train_loss(batch_loss)
+    train_accuracy(batch_accuracy)
