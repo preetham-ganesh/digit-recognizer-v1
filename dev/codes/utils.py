@@ -20,6 +20,7 @@ from matplotlib.pyplot import figure
 import pandas as pd
 from sklearn.utils import shuffle
 import numpy as np
+import time
 
 from model import DigitRecognition
 
@@ -324,10 +325,12 @@ def validation_step(input_batch: tf.Tensor, target_batch: tf.Tensor) -> None:
 
 def generate_model_history_plot(split_history_dataframe: pd.DataFrame, metric_name: str, version: str) -> None:
     """Generates plot for model training and validation history.
+
     Args:
         split_history_dataframe: A Pandas dataframe which contains model training and validation performance history.
         metric_name: A string which contains the current metric name.
         version: A string which contains the current version of the model.
+    
     Returns:
         None.
     """
@@ -357,3 +360,166 @@ def generate_model_history_plot(split_history_dataframe: pd.DataFrame, metric_na
     home_directory_path = os.path.dirname(os.getcwd())
     plt.savefig('{}/results/v{}/utils/model_history_{}.png'.format(home_directory_path, version, metric_name))
     plt.close()
+
+
+def model_training_validation(
+    train_dataset: tf.data.Dataset, validation_dataset: tf.data.Dataset, model_configuration: dict
+) -> None:
+    """Trains and validates the current configuration of the model using the train and validation dataset.
+    Args:
+        train_dataset: A TensorFlow dataset which contains sliced input and target tensors for the Training data split.
+        validation_dataset: A TensorFlow dataset which contains sliced input and target tensors for the Validation data 
+            split.
+        model_configuration: A dictionary which contains current model configuration details.
+    Returns:
+        None.
+    """
+    global model, train_loss, validation_loss, train_accuracy, validation_accuracy
+    home_directory_path = os.path.dirname(os.getcwd())
+
+    # Tensorflow metrics which computes the mean of all the elements.
+    train_loss = tf.keras.metrics.Mean(name='train_loss')
+    validation_loss = tf.keras.metrics.Mean(name='validation_loss')
+    train_accuracy = tf.keras.metrics.Mean(name='train_accuracy')
+    validation_accuracy = tf.keras.metrics.Mean(name='validation_accuracy')
+
+    # Creates instances for neural network model.
+    model = DigitRecognition(model_configuration)
+
+    # Creates checkpoint and manager for the neural network model and the optimizer.
+    optimizer = tf.keras.optimizers.Adam(learning_rate=model_configuration['learning_rate'])
+    checkpoint_directory_path = '{}/results/v{}/checkpoints'.format(
+        home_directory_path, model_configuration['model_version']
+    )
+    checkpoint = tf.train.Checkpoint(optimizer=optimizer, model=model)
+    checkpoint_count = 0
+    best_validation_loss = None
+    manager = tf.train.CheckpointManager(checkpoint, directory=checkpoint_directory_path, max_to_keep=3)
+
+    # Compiles the model to print model summary.
+    input_dim = (
+        model_configuration['final_image_size'], model_configuration['final_image_size'], 
+        model_configuration['n_channels']
+    )
+    _ = model.build((model_configuration['batch_size'], *input_dim))
+    log_information(model.summary())
+    log_information('')
+
+    # Plots the model and saves it as a PNG file.
+    tf.keras.utils.plot_model(
+        model.build_graph(), '{}/results/v{}/utils/model_plot.png'.format(
+            home_directory_path, model_configuration['model_version']
+        ), show_shapes=True, show_layer_names=True, expand_nested=False
+    )
+
+    # Creates empty dataframe for saving the model training and validation metrics for the current model.
+    split_history_dataframe = pd.DataFrame(
+        columns=[
+            'epochs', 'train_loss', 'validation_loss', 'train_accuracy', 'validation_accuracy'
+        ]
+    )
+    split_history_dataframe_path = '{}/results/v{}/utils/split_history.csv'.format(
+        home_directory_path, model_configuration['model_version']
+    )
+
+    # Iterates across epochs for training the neural network model.
+    checkpoint_count = 0
+    best_validation_loss = None
+    for epoch in range(model_configuration['epochs']):
+        epoch_start_time = time.time()
+
+        # Resets states for training and validation metrics before the start of each epoch.
+        train_loss.reset_states()
+        validation_loss.reset_states()
+        train_accuracy.reset_states()
+        validation_accuracy.reset_states()
+
+        # Iterates across the batches in the train dataset.
+        for (batch, (input_batch, target_batch)) in enumerate(
+            train_dataset.take(model_configuration['train_steps_per_epoch'])
+        ):
+            batch_start_time = time.time()
+
+            # Trains the model using the current input and target batch.
+            train_step(input_batch, target_batch, optimizer)
+            batch_end_time = time.time()
+            if batch % 10 == 0:
+                log_information('Epoch={}, Batch={}, Train loss={}, Train accuracy={}, Time taken={} sec.'.format(
+                    epoch + 1, batch, str(round(train_loss.result().numpy(), 3)), 
+                    str(round(train_accuracy.result().numpy(), 3)), round(batch_end_time - batch_start_time, 3)
+                ))
+        log_information('')
+
+        # Iterates across the batches in the validation dataset.
+        for (batch, (input_batch, target_batch)) in enumerate(
+            validation_dataset.take(model_configuration['validation_steps_per_epoch'])
+        ):
+            batch_start_time = time.time()
+
+            # Validates the model using the current input and target batch.
+            validation_step(input_batch, target_batch)
+            batch_end_time = time.time()
+            if batch % 10 == 0:
+                log_information(
+                    'Epoch={}, Batch={}, Validation loss={}, Validation accuracy={}, Time taken={} sec.'.format(
+                        epoch + 1, batch, str(round(validation_loss.result().numpy(), 3)), 
+                        str(round(validation_accuracy.result().numpy(), 3)), 
+                        round(batch_end_time - batch_start_time, 3)
+                    ))
+        log_information('')
+
+        # Updates the complete metrics dataframe with the metrics for the current training and validation metrics.
+        history_dictionary = {
+            'epochs': int(epoch + 1), 'train_loss': str(round(train_loss.result().numpy(), 3)), 
+            'validation_loss': str(round(validation_loss.result().numpy(), 3)), 
+            'train_accuracy': str(round(train_accuracy.result().numpy(), 3)), 
+            'validation_accuracy': str(round(validation_accuracy.result().numpy(), 3))
+        }
+        split_history_dataframe = split_history_dataframe.append(history_dictionary, ignore_index=True)
+        split_history_dataframe.to_csv(split_history_dataframe_path, index=False)
+        epoch_end_time = time.time()
+        log_information(
+            'Epoch={}, Training loss={}, Validation loss={}, Training accuracy={}, Validation accuracy={}, Time '\
+                'taken={} sec.'.format(
+                    epoch + 1, str(round(train_loss.result().numpy(), 3)), 
+                    str(round(validation_loss.result().numpy(), 3)), str(round(train_accuracy.result().numpy(), 3)), 
+                    str(round(validation_accuracy.result().numpy(), 3)), round(epoch_end_time - epoch_start_time, 3)
+                )
+        )
+
+        # If epoch = 1, then best validation loss is replaced with current validation loss, and the checkpoint is saved.
+        if best_validation_loss is None:
+            checkpoint_count = 0
+            best_validation_loss = str(round(validation_loss.result().numpy(), 3))
+            manager.save()
+            log_information('Checkpoint saved at {}.'.format(checkpoint_directory_path))
+        
+        # If the best validation loss is higher than current validation loss, the best validation loss is replaced with 
+        # current validation loss, and the checkpoint is saved.
+        elif best_validation_loss > str(round(validation_loss.result().numpy(), 3)):
+            checkpoint_count = 0
+            log_information('Best validation loss changed from {} to {}'.format(
+                str(best_validation_loss), str(round(validation_loss.result().numpy(), 3))
+            ))
+            best_validation_loss = str(round(validation_loss.result().numpy(), 3))
+            manager.save()
+            log_information('Checkpoint saved at {}'.format(checkpoint_directory_path))
+        
+        # If the best validation loss is not higher than the current validation loss, then the number of times the 
+        # model has not improved is incremented by 1.
+        elif checkpoint_count <= 4:
+            checkpoint_count += 1
+            log_information('Best validation loss did not improve.')
+            log_information('Checkpoint not saved.')
+        
+        # If the number of times the model did not improve is greater than 4, then model is stopped from training 
+        # further.
+        else:
+            log_information('Model did not improve after 4th time. Model stopped from training further.')
+            log_information('')
+            break
+        log_information('')
+    
+    # Generates plots for all metrics in the metrics in the dataframe.
+    generate_model_history_plot(split_history_dataframe, 'loss', model_configuration['model_version'])
+    generate_model_history_plot(split_history_dataframe, 'accuracy', model_configuration['model_version'])
