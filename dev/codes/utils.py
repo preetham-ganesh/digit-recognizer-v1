@@ -295,3 +295,28 @@ def train_step(input_batch: tf.Tensor, target_batch: tf.Tensor, optimizer: tf.ke
     # Computes mean for loss and accuracy.
     train_loss(batch_loss)
     train_accuracy(batch_accuracy)
+
+
+def validation_step(input_batch: tf.Tensor, target_batch: tf.Tensor) -> None:
+    """Validates the model using the current input and target validation batches.
+
+    Args:
+        input_batch: A tensor which contains the input images from the current batch for validating the model.
+        target_batch: A tensor which contains the target images from the current batch for validating the model.
+    
+    Returns:
+        None.
+    """
+    # Processes input batch for validating the model.
+    input_batch = process_input_batch(input_batch)
+
+    # Computes masked images for all input images in the batch.
+    predicted_batch = model(input_batch, False)
+
+    # Computes loss & accuracy for the target batch and predicted batch.
+    batch_loss = loss_function(target_batch, predicted_batch)
+    batch_accuracy = accuracy_function(target_batch, predicted_batch)
+
+    # Computes mean for loss & accuracy.
+    validation_loss(batch_loss)
+    validation_accuracy(batch_accuracy)
