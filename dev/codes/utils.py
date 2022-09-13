@@ -523,3 +523,42 @@ def model_training_validation(
     # Generates plots for all metrics in the metrics in the dataframe.
     generate_model_history_plot(split_history_dataframe, 'loss', model_configuration['model_version'])
     generate_model_history_plot(split_history_dataframe, 'accuracy', model_configuration['model_version'])
+
+
+def model_testing(test_dataset: tf.data.Dataset, model_configuration: dict) -> None:
+    """Tests the currently trained model using the test dataset.
+    Args:
+        test_dataset: A TensorFlow dataset which contains sliced input and target tensors for the Test data split.
+        model_configuration: A dictionary which contains current model configuration details.
+    Returns:
+        None.
+    """
+    global model, validation_loss, validation_accuracy
+    home_directory_path = os.path.dirname(os.getcwd())
+
+    # Tensorflow metrics which computes the mean of all the elements.
+    validation_loss = tf.keras.metrics.Mean(name='validation_loss')
+    validation_accuracy = tf.keras.metrics.Mean(name='validation_accuracy')
+    validation_loss.reset_states()
+    validation_accuracy.reset_states()
+
+    # Creates instances for neural network model.
+    model = DigitRecognition(model_configuration)
+
+    checkpoint_directory_path = '{}/results/v{}/checkpoints'.format(
+        home_directory_path, model_configuration['model_version']
+    )
+    checkpoint = tf.train.Checkpoint(model=model)
+    checkpoint.restore(tf.train.latest_checkpoint(checkpoint_directory_path))
+
+    # Iterates across the batches in the test dataset.
+    for (batch, (input_batch, target_batch)) in enumerate(
+        test_dataset.take(model_configuration['validation_steps_per_epoch'])
+    ):
+
+        # Validates the model using the current input and target batch.
+        validation_step(input_batch, target_batch)
+    
+    log_information('Test loss={}.'.format(str(round(validation_loss.result().numpy(), 3))))
+    log_information('Test accuracy={}.'.format(str(round(validation_accuracy.result().numpy(), 3))))
+    log_information('')
