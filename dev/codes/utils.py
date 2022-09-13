@@ -228,3 +228,19 @@ def process_input_batch(input_batch: tf.Tensor) -> tf.Tensor:
     # Normalizes the input and target batches from [0, 255] range to [0, 1] range.
     input_batch = input_batch / 255.0
     return input_batch
+
+
+def loss_function(target_batch: tf.Tensor, predicted_batch: tf.Tensor) -> tf.Tensor:
+    """Computes the loss value for the current batch of the predicted values based on comparison with actual values.
+
+    Args:
+        target_batch: A tensor which contains the actual values for the current batch.
+        predicted_batch: A tensor which contains the predicted values for the current batch.
+    
+    Returns:
+        A tensor which contains loss for the current batch.
+    """
+    # Creates the loss object for the Categorical Crossentropy & computes loss using the target and predicted batches.
+    loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
+    current_loss = loss_object(target_batch, predicted_batch)
+    return current_loss
