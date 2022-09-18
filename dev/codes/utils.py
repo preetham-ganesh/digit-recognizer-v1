@@ -674,3 +674,27 @@ def predict(images: tf.Tensor, model_configuration: dict) -> list:
     predictions = model(images, False)
     predicted_labels = [np.argmax(predictions[i]) for i in range(len(predictions))]
     return predicted_labels
+
+
+def create_submission(predicted_labels: list, model_configuration: dict) -> None:
+    """Creates a pandas dataframe based on the predicted_labels and converts it into a CSV file.
+    
+    Args:
+        predicted_labels: A list which contains the labels for all the images given as input.
+        model_configuration: A dictionary which contains current model configuration details.
+    
+    Returns:
+        None.
+    """
+    home_directory_path = os.path.dirname(os.getcwd())
+
+    # Adds the predicted labels to a dictionary.
+    submission_dict = dict()
+    submission_dict['ImageId'] = [i for i in range(1, len(predicted_labels) + 1)]
+    submission_dict['Label'] = predicted_labels
+
+    # Converts dictionary into a dataframe, and saves it as a CSV file.
+    submission = pd.DataFrame(submission_dict, columns=['ImageId', 'Label'])
+    submission.to_csv(
+        '{}/results/v{}/utils/submission.csv'.format(home_directory_path, model_configuration['version']), index=False
+    )
