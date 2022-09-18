@@ -45,7 +45,7 @@ class DigitRecognition(tf.keras.Model):
                 self.model_layers[layer_name] = tf.keras.layers.MaxPool2D(
                     pool_size=current_layer_configuration["pool_size"],
                     strides=current_layer_configuration["strides"],
-                    padding=current_layer_configuration["padding"]
+                    padding=current_layer_configuration["padding"],
                 )
 
             # If layer's name is like 'dropout_', a Dropout layer is initialized based on layer configuration.
