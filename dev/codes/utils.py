@@ -412,7 +412,7 @@ def model_training_validation(
         validation_dataset: A TensorFlow dataset which contains sliced input and target tensors for the Validation data
             split.
         model_configuration: A dictionary which contains current model configuration details.
-    
+
     Returns:
         None.
     """
@@ -609,7 +609,7 @@ def model_testing(test_dataset: tf.data.Dataset, model_configuration: dict) -> N
     Args:
         test_dataset: A TensorFlow dataset which contains sliced input and target tensors for the Test data split.
         model_configuration: A dictionary which contains current model configuration details.
-    
+
     Returns:
         None.
     """
@@ -649,13 +649,13 @@ def model_testing(test_dataset: tf.data.Dataset, model_configuration: dict) -> N
 
 
 def predict(images: tf.Tensor, model_configuration: dict) -> list:
-    """Predicts the labels for the images given as input by using the model configuration to restore the corresponding 
+    """Predicts the labels for the images given as input by using the model configuration to restore the corresponding
         weights.
-    
+
     Args:
         images: A tensor which contains preprocessed images.
         model_configuration: A dictionary which contains current model configuration details.
-    
+
     Returns:
         A list which contains predicted labels for all input images.
     """
@@ -678,11 +678,11 @@ def predict(images: tf.Tensor, model_configuration: dict) -> list:
 
 def create_submission(predicted_labels: list, model_configuration: dict) -> None:
     """Creates a pandas dataframe based on the predicted_labels and converts it into a CSV file.
-    
+
     Args:
         predicted_labels: A list which contains the labels for all the images given as input.
         model_configuration: A dictionary which contains current model configuration details.
-    
+
     Returns:
         None.
     """
@@ -690,11 +690,14 @@ def create_submission(predicted_labels: list, model_configuration: dict) -> None
 
     # Adds the predicted labels to a dictionary.
     submission_dict = dict()
-    submission_dict['ImageId'] = [i for i in range(1, len(predicted_labels) + 1)]
-    submission_dict['Label'] = predicted_labels
+    submission_dict["ImageId"] = [i for i in range(1, len(predicted_labels) + 1)]
+    submission_dict["Label"] = predicted_labels
 
     # Converts dictionary into a dataframe, and saves it as a CSV file.
-    submission = pd.DataFrame(submission_dict, columns=['ImageId', 'Label'])
+    submission = pd.DataFrame(submission_dict, columns=["ImageId", "Label"])
     submission.to_csv(
-        '{}/results/v{}/utils/submission.csv'.format(home_directory_path, model_configuration['version']), index=False
+        "{}/results/v{}/utils/submission.csv".format(
+            home_directory_path, model_configuration["version"]
+        ),
+        index=False,
     )
