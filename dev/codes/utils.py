@@ -605,9 +605,11 @@ def model_training_validation(
 
 def model_testing(test_dataset: tf.data.Dataset, model_configuration: dict) -> None:
     """Tests the currently trained model using the test dataset.
+
     Args:
         test_dataset: A TensorFlow dataset which contains sliced input and target tensors for the Test data split.
         model_configuration: A dictionary which contains current model configuration details.
+    
     Returns:
         None.
     """
@@ -644,3 +646,31 @@ def model_testing(test_dataset: tf.data.Dataset, model_configuration: dict) -> N
         "Test accuracy={}.".format(str(round(validation_accuracy.result().numpy(), 3)))
     )
     log_information("")
+
+
+def predict(images: tf.Tensor, model_configuration: dict) -> list:
+    """Predicts the labels for the images given as input by using the model configuration to restore the corresponding 
+        weights.
+    
+    Args:
+        images: A tensor which contains preprocessed images.
+        model_configuration: A dictionary which contains current model configuration details.
+    
+    Returns:
+        A list which contains predicted labels for all input images.
+    """
+    home_directory_path = os.path.dirname(os.getcwd())
+
+    # Creates instances for neural network model.
+    model = DigitRecognition(model_configuration)
+
+    checkpoint_directory_path = "{}/results/v{}/checkpoints".format(
+        home_directory_path, model_configuration["model_version"]
+    )
+    checkpoint = tf.train.Checkpoint(model=model)
+    checkpoint.restore(tf.train.latest_checkpoint(checkpoint_directory_path))
+
+    # Performs predictions based on the trained model and saves the index of maximum value for each image.
+    predictions = model(images, False)
+    predicted_labels = [np.argmax(predictions[i]) for i in range(len(predictions))]
+    return predicted_labels
