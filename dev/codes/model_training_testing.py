@@ -3,15 +3,23 @@
 # email = 'preetham.ganesh2021@gmail.com'
 
 
+from utils import save_json_file
 from utils import create_log
 from utils import log_information
+from utils import set_physical_devices_memory_limit
 from utils import load_dataset
 from utils import data_splitting
 from utils import data_preprocessing
+from utils import shuffle_slice_dataset
+from utils import model_training_validation
+from utils import model_testing
 
 
 def main():
     log_information("")
+
+    # Sets memory limit of GPU if found in the system.
+    set_physical_devices_memory_limit()
 
     # Loads the original Digit Recognizer dataset downloaded from Kaggle.
     original_train_data, original_test_data = load_dataset()
@@ -110,6 +118,48 @@ def main():
             "dense_2": {"units": 10, "activation": "softmax"},
         },
     }
+    save_json_file(
+        model_configuration, "model_configuration", "results/v{}/utils".format(version)
+    )
+    log_information("")
+
+    # Shuffles input and target data. Converts into tensorflow datasets.
+    validation_dataset = shuffle_slice_dataset(
+        new_validation_input_data, new_validation_target_data, batch_size
+    )
+    del new_validation_input_data, new_validation_target_data
+    test_dataset = shuffle_slice_dataset(
+        new_test_input_data, new_test_target_data, batch_size
+    )
+    del new_test_input_data, new_test_target_data
+    train_dataset = shuffle_slice_dataset(
+        new_train_input_data, new_train_target_data, batch_size
+    )
+    del new_train_input_data, new_train_target_data
+    log_information("Shuffled & Sliced the datasets.")
+    log_information("")
+    log_information(
+        "No. of Training steps per epoch: {}".format(
+            model_configuration["train_steps_per_epoch"]
+        )
+    )
+    log_information(
+        "No. of Validation steps per epoch: {}".format(
+            model_configuration["validation_steps_per_epoch"]
+        )
+    )
+    log_information(
+        "No. of Testing steps: {}".format(model_configuration["test_steps_per_epoch"])
+    )
+    log_information("")
+
+    # Trains and validation the model.
+    model_training_validation(train_dataset, validation_dataset, model_configuration)
+    log_information("")
+
+    # Tests the trained model on test dataset.
+    model_testing(test_dataset, model_configuration)
+    log_information("")
 
 
 if __name__ == "__main__":
