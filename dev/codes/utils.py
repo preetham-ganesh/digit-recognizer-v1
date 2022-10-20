@@ -25,10 +25,6 @@ import time
 from model import DigitRecognition
 
 
-physical_devices = tf.config.list_physical_devices("GPU")
-tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
-
-
 def check_directory_path_existence(directory_path: str) -> str:
     """Creates the absolute path for the directory path given in argument if it does not already exist.
 
@@ -88,6 +84,34 @@ def log_information(log: str) -> None:
     except NameError:
         _ = ""
     print(log)
+
+
+def set_physical_devices_memory_limit() -> None:
+    """Sets memory limit of GPU if found in the system.
+
+    Args:
+        None.
+    
+    Returns:
+        None.
+    """
+    # Lists physical devices in the system.
+    gpu_devices = tf.config.list_physical_devices("GPU")
+
+    # If GPU device is found in the system, then the memory limit is set.
+    if len(gpu_devices) > 0:
+        tf.config.experimental.set_memory_growth(gpu_devices[0], enable=True)
+        gpu_available = True
+    else:
+        gpu_available = False
+    
+    if gpu_available:
+        log_information("GPU is available and will be used as accelerator.")
+    else:
+        log_information(
+            "GPU is not available, hence the model will be executed on CPU."
+        )
+    log_information("")
 
 
 def save_json_file(dictionary: dict, file_name: str, directory_path: str) -> None:
