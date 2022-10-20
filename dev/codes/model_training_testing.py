@@ -79,6 +79,8 @@ def main():
         "batch_size": batch_size,
         "model_version": version,
         "learning_rate": 0.001,
+        "final_image_size": 28,
+        "n_channels": 1,
         "train_steps_per_epoch": len(new_train_input_data) // batch_size,
         "validation_steps_per_epoch": len(new_validation_input_data) // batch_size,
         "test_steps_per_epoch": len(new_test_input_data) // batch_size,
