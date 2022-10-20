@@ -411,6 +411,7 @@ def generate_model_history_plot(
     # Generates the plot for the epochs vs metrics.
     plt.xlabel("epochs")
     plt.ylabel(metric_name)
+    plt.xticks(epochs)
     plt.legend(loc="upper left")
     plt.grid(color="black", linestyle="-.", linewidth=2, alpha=0.3)
 
