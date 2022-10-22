@@ -13,6 +13,9 @@ from utils import data_preprocessing
 from utils import shuffle_slice_dataset
 from utils import model_training_validation
 from utils import model_testing
+from utils import process_input_batch
+from utils import predict
+from utils import create_submission
 
 
 def main():
@@ -161,6 +164,21 @@ def main():
 
     # Tests the trained model on test dataset.
     model_testing(test_dataset, model_configuration)
+    log_information("")
+
+    # Preprocesses the original test input data.
+    original_test_input_data = data_preprocessing(original_test_data)
+    log_information("Finished preprocessing original test data.")
+    log_information("")
+
+    # Predicts labels for images in the original test input data using current model.
+    predicted_labels = predict(original_test_input_data, model_configuration)
+    log_information("Finished predicting labels original test data.")
+    log_information("")
+
+    # Creates a submission using the predicted labels.
+    create_submission(predicted_labels, model_configuration)
+    log_information("Finished saving submission for current model.")
     log_information("")
 
 
