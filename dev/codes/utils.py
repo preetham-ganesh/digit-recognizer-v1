@@ -104,7 +104,7 @@ def set_physical_devices_memory_limit() -> None:
         gpu_available = True
     else:
         gpu_available = False
-    
+
     if gpu_available:
         log_information("GPU is available and will be used as accelerator.")
     else:
@@ -696,6 +696,7 @@ def predict(images: tf.Tensor, model_configuration: dict) -> list:
     checkpoint.restore(tf.train.latest_checkpoint(checkpoint_directory_path))
 
     # Performs predictions based on the trained model and saves the index of maximum value for each image.
+    images = process_input_batch(images)
     predictions = model(images, False)
     predicted_labels = [np.argmax(predictions[i]) for i in range(len(predictions))]
     return predicted_labels
@@ -722,7 +723,7 @@ def create_submission(predicted_labels: list, model_configuration: dict) -> None
     submission = pd.DataFrame(submission_dict, columns=["ImageId", "Label"])
     submission.to_csv(
         "{}/results/v{}/utils/submission.csv".format(
-            home_directory_path, model_configuration["version"]
+            home_directory_path, model_configuration["model_version"]
         ),
         index=False,
     )
