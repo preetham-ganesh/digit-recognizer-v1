@@ -1,0 +1,69 @@
+{
+    "epochs": 100,
+    "batch_size": 64,
+    "model_version": "1.0.0",
+    "learning_rate": 0.001,
+    "final_image_size": 28,
+    "n_channels": 1,
+    "train_steps_per_epoch": 625,
+    "validation_steps_per_epoch": 15,
+    "test_steps_per_epoch": 15,
+    "layers_arrangement": [
+        "conv2d_0",
+        "maxpool2d_0",
+        "conv2d_1",
+        "maxpool2d_1",
+        "flatten",
+        "dense_0",
+        "dense_1",
+        "dense_2"
+    ],
+    "layers_start_index": 0,
+    "layers_configuration": {
+        "conv2d_0": {
+            "filters": 8,
+            "kernel": 4,
+            "padding": "valid",
+            "activation": "relu",
+            "strides": 1,
+            "kernel_initializer": "glorot_uniform"
+        },
+        "maxpool2d_0": {
+            "pool_size": [
+                2,
+                2
+            ],
+            "strides": 2,
+            "padding": "valid"
+        },
+        "conv2d_1": {
+            "filters": 16,
+            "kernel": 4,
+            "padding": "valid",
+            "activation": "relu",
+            "strides": 1,
+            "kernel_initializer": "glorot_uniform"
+        },
+        "maxpool2d_1": {
+            "pool_size": [
+                2,
+                2
+            ],
+            "strides": 2,
+            "padding": "valid"
+        },
+        "flatten": {},
+        "dense_0": {
+            "units": 128,
+            "activation": "relu"
+        },
+        "dense_1": {
+            "units": 64,
+            "activation": "relu"
+        },
+        "dense_2": {
+            "units": 10,
+            "activation": "softmax"
+        }
+    }
+}
