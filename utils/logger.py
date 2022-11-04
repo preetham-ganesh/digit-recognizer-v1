@@ -1,6 +1,4 @@
-# authors_name = 'Preetham Ganesh'
-# project_title = 'Digit Recognizer'
-# email = 'preetham.ganesh2021@gmail.com'
+# Copyright © 2022 Preetham Ganesh.
 
 
 import logging
