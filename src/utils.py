@@ -61,3 +61,28 @@ def create_log(logger_directory_path: str, log_file_name: str) -> None:
     global logger
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
+
+
+def log_information(log: str) -> None:
+    """Logs current information.
+
+    Saves current log information, and prints it in terminal.
+
+    Args:
+        log: A string for the information that needs to be printed in terminal and saved in log.
+
+    Returns:
+        None.
+
+    Exception:
+        NameError: When the logger is not defined, this exception is thrown.
+    """
+    # Type checks arguments.
+    assert isinstance(log, str), "Variable log should be of type 'str'."
+
+    # Adds current log into log file.
+    try:
+        logger.info(log)
+    except NameError:
+        _ = ""
+    print(log)
