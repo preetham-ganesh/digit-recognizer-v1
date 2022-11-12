@@ -2,6 +2,7 @@
 
 
 import os
+import logging
 
 
 def check_directory_path_existence(directory_path: str) -> str:
@@ -18,7 +19,7 @@ def check_directory_path_existence(directory_path: str) -> str:
     # Asserts type of arguments.
     assert isinstance(
         directory_path, str
-    ), "Variable directory_path is not of type 'str'."
+    ), "Variable directory_path should be of type 'str'."
 
     # Creates the following directory path if it does not exist.
     home_directory_path = os.getcwd()
@@ -26,3 +27,37 @@ def check_directory_path_existence(directory_path: str) -> str:
     if not os.path.isdir(absolute_directory_path):
         os.makedirs(absolute_directory_path)
     return absolute_directory_path
+
+
+def create_log(logger_directory_path: str, log_file_name: str) -> None:
+    """Creaters a logger.
+
+    Creates an object for logging terminal output.
+
+    Args:
+        logger_directory_path: A string for the location where the log file should be stored.
+        log_file_name: A string for the name for the log file.
+
+    Returns:
+        None.
+    """
+    # Asserts type of arguments.
+    assert isinstance(
+        logger_directory_path, str
+    ), "Logger_directory_path should be of type 'str'."
+    assert isinstance(
+        log_file_name, str
+    ), "Variable log_file_name should be of type 'str'."
+
+    # Checks if the following path exists.
+    logger_directory_path = check_directory_path_existence(logger_directory_path)
+
+    # Create and configure logger
+    logging.basicConfig(
+        filename="{}/{}.log".format(logger_directory_path, log_file_name),
+        format="%(asctime)s %(message)s",
+        filemode="w",
+    )
+    global logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
