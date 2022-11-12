@@ -119,3 +119,32 @@ def save_json_file(dictionary: dict, file_name: str, directory_path: str) -> Non
         json.dump(dictionary, out_file, indent=4)
     out_file.close()
     log_information("{} file saved successfully at {}.".format(file_name, file_path))
+
+
+def load_json_file(file_name: str, directory_path: str) -> dict:
+    """Loads a JSON file as a dictionary.
+
+    Loads a JSON file as a dictionary into memory based on the file_name.
+
+    Args:
+        file_name: A string for the name of the of the file to be loaded.
+        directory_path: A string for the location where the directory path exists.
+
+    Returns:
+        A dictionary loaded from the JSON file.
+    """
+    # Types checks input arguments.
+    assert isinstance(file_name, str), "Variable file_name should be of type 'str'."
+    assert isinstance(
+        directory_path, str
+    ), "Variable directory_path should be of type 'str'."
+
+    # Loads dictionary
+    file_path = "{}/{}.json".format(directory_path, file_name)
+    with open(file_path, "r") as out_file:
+        dictionary = json.load(out_file)
+    out_file.close()
+
+    # Type checks output.
+    assert isinstance(dictionary, dict), "Variable dictionary should be of type 'dict'."
+    return dictionary
