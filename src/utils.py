@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Preetham Ganesh.
+# Copyright (c) Preetham Ganesh.
 
 
 import os
