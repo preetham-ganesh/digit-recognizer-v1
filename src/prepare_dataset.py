@@ -16,7 +16,26 @@ class Dataset:
     def __init__(
         self, validation_data_percent: float, test_data_percent: float
     ) -> None:
-        """"""
+        """Creates object for the Dataset class."""
+        # Asserts type & value of the arguments.
+        assert isinstance(
+            validation_data_percent, float
+        ), "Variable validation_data_percent should be of type 'float'."
+        assert isinstance(
+            test_data_percent, float
+        ), "Variable test_data_percent should be of type 'float'."
+        assert (
+            validation_data_percent > 0 and validation_data_percent < 1
+        ), "Variable validation_data_percent should be between 0 & 1 (not included)."
+        assert (
+            test_data_percent > 0 and test_data_percent < 1
+        ), "Variable test_data_percent should be between 0 & 1 (not included)."
+        assert (
+            validation_data_percent + test_data_percent > 0
+            and validation_data_percent + test_data_percent < 1
+        ), "Variables validation_data_percent + test_data_percent should be between 0 & 1 (not included)."
+
+        # Initalizes data percent variables.
         self.validation_data_percent = validation_data_percent
         self.test_data_percent = test_data_percent
 
