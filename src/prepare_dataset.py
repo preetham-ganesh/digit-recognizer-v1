@@ -11,7 +11,18 @@ import numpy as np
 
 
 class Dataset:
-    """"""
+    """Loads the dataset for training & testing the model.
+
+    Args:
+        original_train_data: A pandas dataframe for original training data downloaded from Kaggle.
+        original_test_data: A pandas dataframe for original testing data downloaded from Kaggle.
+        new_train_data: A pandas dataframe for training data split from original train data.
+        new_validation_data: A pandas dataframe for validation data split from original train data.
+        new_test_data: A pandas dataframe for test data split from original train data.
+        train_dataset: A tensorflow dataset which contains tensors for train input & target data.
+        validation_dataset: A tensorflow dataset which contains tensors for validation input & target data.
+        test_dataset: A tensorflow dataset which contains tensors for test input & target data.
+    """
 
     def __init__(
         self, validation_data_percent: float, test_data_percent: float, batch_size: int
