@@ -131,20 +131,34 @@ class Dataset:
         return dataset
 
     def preprocess_dataset(self) -> None:
-        """"""
+        """Preprocesses the dataset downloaded from Kaggle."""
         # Generates input & target data from split dataset & deletes it.
         (
-            self.new_train_input_data,
-            self.new_train_target_data,
+            new_train_input_data,
+            new_train_target_data,
         ) = self.extract_input_target_data(self.new_train_data)
         del self.new_train_data
         (
-            self.new_validation_input_data,
-            self.new_validation_target_data,
+            new_validation_input_data,
+            new_validation_target_data,
         ) = self.extract_input_target_data(self.new_validation_data)
         del self.new_validation_data
         (
-            self.new_test_input_data,
-            self.new_test_target_data,
+            new_test_input_data,
+            new_test_target_data,
         ) = self.extract_input_target_data(self.new_test_data)
         del self.new_test_data
+
+        # Shuffles input and target data. Converts into tensorflow datasets.
+        self.test_dataset = self.combine_shuffle_slice_dataset(
+            new_test_input_data, new_test_target_data
+        )
+        del new_test_input_data, new_test_target_data
+        self.validation_dataset = self.combine_shuffle_slice_dataset(
+            new_validation_input_data, new_validation_target_data
+        )
+        del new_validation_input_data, new_validation_target_data
+        self.train_dataset = self.combine_shuffle_slice_dataset(
+            new_train_input_data, new_test_target_data
+        )
+        del new_train_input_data, new_train_target_data
