@@ -14,7 +14,7 @@ class Dataset:
     """"""
 
     def __init__(
-        self, validation_data_percent: float, test_data_percent: float
+        self, validation_data_percent: float, test_data_percent: float, batch_size: int
     ) -> None:
         """Creates object for the Dataset class."""
         # Asserts type & value of the arguments.
@@ -24,12 +24,18 @@ class Dataset:
         assert isinstance(
             test_data_percent, float
         ), "Variable test_data_percent should be of type 'float'."
+        assert isinstance(
+            batch_size, float
+        ), "Variable batch_size should be of type 'int'."
         assert (
             validation_data_percent > 0 and validation_data_percent < 1
         ), "Variable validation_data_percent should be between 0 & 1 (not included)."
         assert (
             test_data_percent > 0 and test_data_percent < 1
         ), "Variable test_data_percent should be between 0 & 1 (not included)."
+        assert (
+            batch_size > 0 and batch_size < 257
+        ), "Variable batch_size should be between 0 & 257 (not included)."
         assert (
             validation_data_percent + test_data_percent > 0
             and validation_data_percent + test_data_percent < 1
@@ -70,7 +76,10 @@ class Dataset:
         ]
         self.new_train_data = self.original_train_data[validation_data_end_index:]
 
-    def preprocess_current_dataset(self, new_data: pd.DataFrame) -> Tuple[tf.Tensor]:
+        # Deletes the original training data.
+        del self.original_train_data
+
+    def extract_input_target_data(self, new_data: pd.DataFrame) -> Tuple[tf.Tensor]:
         """Preprocesses current dataset, to produce input (& target) data."""
         # Asserts type of arguments.
         assert isinstance(
@@ -99,3 +108,43 @@ class Dataset:
             new_target_data = tf.keras.utils.to_categorical(new_target_data)
             return new_input_data, new_target_data
         return new_input_data
+
+    def combine_shuffle_slice_dataset(
+        self, input_data: tf.Tensor, target_data: tf.Tensor
+    ) -> tf.data.Dataset:
+        """Converts the input data and target data into tensorflow dataset and slices them based on batch size."""
+        # Asserts type of arguments.
+        assert isinstance(
+            input_data, pd.DataFrame
+        ), "Variable input_data should be of type 'tf.Tensor'."
+        assert isinstance(
+            target_data, pd.DataFrame
+        ), "Variable target_data should be of type 'tf.Tensor'."
+
+        # Zip input and output tensors into a single dataset and shuffles it.
+        dataset = tf.data.Dataset.from_tensor_slices((input_data, target_data)).shuffle(
+            len(input_data)
+        )
+
+        # Slices the combined dataset based on batch size, and drops remainder values.
+        dataset = dataset.batch(self.batch_size, drop_remainder=True)
+        return dataset
+
+    def preprocess_dataset(self) -> None:
+        """"""
+        # Generates input & target data from split dataset & deletes it.
+        (
+            self.new_train_input_data,
+            self.new_train_target_data,
+        ) = self.extract_input_target_data(self.new_train_data)
+        del self.new_train_data
+        (
+            self.new_validation_input_data,
+            self.new_validation_target_data,
+        ) = self.extract_input_target_data(self.new_validation_data)
+        del self.new_validation_data
+        (
+            self.new_test_input_data,
+            self.new_test_target_data,
+        ) = self.extract_input_target_data(self.new_test_data)
+        del self.new_test_data
