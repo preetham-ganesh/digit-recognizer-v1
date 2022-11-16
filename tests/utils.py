@@ -43,9 +43,9 @@ def test_check_directory_path_existence() -> None:
 
 @pytest.mark.test_save_load_json_file
 def test_save_load_json_file() -> None:
-    """Test cases for chech_directory_path_existence function.
+    """Test cases for load & save JSON file functions.
 
-    Test cases for chech_directory_path_existence function.
+    Test cases for load & save JSON file functions.
 
     Args:
         None.
@@ -53,3 +53,8 @@ def test_save_load_json_file() -> None:
     Returns:
         None.
     """
+    # Test case 1
+    dictionary = {"a": [1, 2, 3, 4], "b": [2, 3, 4]}
+    save_json_file(dictionary, "test_1", "tests")
+    loaded_dictionary = load_json_file("test_1", "tests")
+    assert dictionary, loaded_dictionary
