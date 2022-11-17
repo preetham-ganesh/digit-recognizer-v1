@@ -36,38 +36,41 @@ class Dataset:
         # Asserts type & value of the arguments.
         assert isinstance(
             validation_data_percentage, float
-        ), "Variable validation_data_percent should be of type 'float'."
+        ), "Variable validation_data_percentage should be of type 'float'."
         assert isinstance(
             test_data_percentage, float
-        ), "Variable test_data_percent should be of type 'float'."
+        ), "Variable test_data_percentage should be of type 'float'."
         assert isinstance(
             batch_size, int
         ), "Variable batch_size should be of type 'int'."
         assert (
             validation_data_percentage > 0 and validation_data_percentage < 1
-        ), "Variable validation_data_percent should be between 0 & 1 (not included)."
+        ), "Variable validation_data_percentage should be between 0 & 1 (not included)."
         assert (
             test_data_percentage > 0 and test_data_percentage < 1
-        ), "Variable test_data_percent should be between 0 & 1 (not included)."
+        ), "Variable test_data_percentage should be between 0 & 1 (not included)."
         assert (
             batch_size > 0 and batch_size < 257
         ), "Variable batch_size should be between 0 & 257 (not included)."
         assert (
             validation_data_percentage + test_data_percentage > 0
             and validation_data_percentage + test_data_percentage < 1
-        ), "Variables validation_data_percent + test_data_percent should be between 0 & 1 (not included)."
+        ), "Variables validation_data_percentage + test_data_percentage should be between 0 & 1 (not included)."
 
         # Initalizes data percent variables.
         self.validation_data_percentage = validation_data_percentage
         self.test_data_percentage = test_data_percentage
         log_information(
-            "Validation data percentage for data split: {}".format(
-                self.validation_data_percentage
+            "Validation data percentage for data split: {}%".format(
+                self.validation_data_percentage * 100
             )
         )
         log_information(
-            "Test data percentage for data split: {}".format(self.test_data_percentage)
+            "Test data percentage for data split: {}%".format(
+                self.test_data_percentage * 100
+            )
         )
+        log_information("")
 
     def load_dataset(self) -> None:
         """Loads original downloaded dataset."""
@@ -78,10 +81,17 @@ class Dataset:
         self.original_test_data = pd.read_csv(
             "{}/data/raw_data/test.csv".format(home_directory_path)
         )
-
-        # Computes number of examples in original training & testing data.
-        self.n_original_train_examples = len(self.original_train_data)
-        self.n_original_test_examples = len(self.original_test_data)
+        log_information(
+            "No. of images in the original train dataset: {}".format(
+                len(self.original_train_data)
+            )
+        )
+        log_information(
+            "No. of images in the original test dataset: {}".format(
+                len(self.original_test_data)
+            )
+        )
+        log_information("")
 
     def split_dataset(self) -> None:
         """Splits the data into training, validation, and testing dataframes."""
@@ -105,9 +115,19 @@ class Dataset:
         self.new_train_data = self.original_train_data[validation_data_end_index:]
 
         # Computes number of examples in split datasets.
-        self.n_split_train_examples = len(self.new_train_data)
-        self.n_split_validation_examples = len(self.new_validation_data)
-        self.n_split_test_examples = len(self.new_test_data)
+        log_information(
+            "No. of examples in split train dataset: {}".format(
+                len(self.new_train_data)
+            )
+        )
+        log_information(
+            "No. of examples in split validation dataset: {}".format(
+                len(self.new_validation_data)
+            )
+        )
+        log_information(
+            "No. of examples in split test dataset: {}".format(len(self.new_test_data))
+        )
 
         # Deletes the original training data.
         del self.original_train_data
