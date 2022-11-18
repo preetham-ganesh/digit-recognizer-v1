@@ -84,3 +84,17 @@ class DigitRecognizer(tf.keras.Model):
             else:
                 x = self.model_layers[layer_name](x)
         return x
+
+    def build_graph(self) -> tf.keras.Model:
+        """Builds plottable graph for the model."""
+        # Creates the input layer using the model configuration.
+        x = tf.keras.layers.Input(
+            shape=(
+                self.model_configuration["final_image_size"],
+                self.model_configuration["final_image_size"],
+                self.model_configuration["n_channels"],
+            )
+        )
+
+        # Creates an object for the tensorflow model and returns it.
+        return tf.keras.Model(inputs=[x], outputs=self.call(x, False))
