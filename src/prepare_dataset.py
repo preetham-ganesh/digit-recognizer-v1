@@ -21,6 +21,7 @@ class Dataset:
         new_train_data: A pandas dataframe for training data split from original train data.
         new_validation_data: A pandas dataframe for validation data split from original train data.
         new_test_data: A pandas dataframe for test data split from original train data.
+        new_test_input_data: A tensor for original test input data.
         train_dataset: A tensorflow dataset which contains tensors for train input & target data.
         validation_dataset: A tensorflow dataset which contains tensors for validation input & target data.
         test_dataset: A tensorflow dataset which contains tensors for test input & target data.
