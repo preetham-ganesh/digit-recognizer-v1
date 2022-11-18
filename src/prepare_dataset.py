@@ -60,6 +60,7 @@ class Dataset:
         # Initalizes data percent variables.
         self.validation_data_percentage = validation_data_percentage
         self.test_data_percentage = test_data_percentage
+        self.batch_size = batch_size
         log_information(
             "Validation data percentage for data split: {}%".format(
                 self.validation_data_percentage * 100
@@ -100,10 +101,10 @@ class Dataset:
 
         # Computes end index for validation & test data.
         test_data_end_index = int(
-            len(self.original_train_data) * self.test_data_percent
+            len(self.original_train_data) * self.test_data_percentage
         )
         validation_data_end_index = (
-            int(len(self.original_train_data) * self.validation_data_percent)
+            int(len(self.original_train_data) * self.validation_data_percentage)
             + test_data_end_index
         )
 
@@ -128,6 +129,7 @@ class Dataset:
         log_information(
             "No. of examples in split test dataset: {}".format(len(self.new_test_data))
         )
+        log_information("")
 
         # Deletes the original training data.
         del self.original_train_data
@@ -159,6 +161,7 @@ class Dataset:
         # If label column exists in the data, then converts target data into categorical format.
         if "label" in list(new_data.columns):
             new_target_data = tf.keras.utils.to_categorical(new_target_data)
+            new_target_data = tf.convert_to_tensor(new_target_data, dtype="uint8")
             return new_input_data, new_target_data
         return new_input_data
 
@@ -168,10 +171,10 @@ class Dataset:
         """Converts the input data and target data into tensorflow dataset and slices them based on batch size."""
         # Asserts type of arguments.
         assert isinstance(
-            input_data, pd.DataFrame
+            input_data, tf.Tensor
         ), "Variable input_data should be of type 'tf.Tensor'."
         assert isinstance(
-            target_data, pd.DataFrame
+            target_data, tf.Tensor
         ), "Variable target_data should be of type 'tf.Tensor'."
 
         # Zip input and output tensors into a single dataset and shuffles it.
@@ -190,37 +193,71 @@ class Dataset:
             new_train_input_data,
             new_train_target_data,
         ) = self.extract_input_target_data(self.new_train_data)
+        log_information(
+            "Train data split Input tensor shape: {}".format(new_train_input_data.shape)
+        )
+        log_information(
+            "Train data split Target tensor shape: {}".format(
+                new_train_target_data.shape
+            )
+        )
         del self.new_train_data
-        self.train_split_input_shape = new_train_input_data.shape
-        self.train_split_target_shape = new_train_target_data.shape
         (
             new_validation_input_data,
             new_validation_target_data,
         ) = self.extract_input_target_data(self.new_validation_data)
-        self.validation_split_input_shape = new_validation_input_data.shape
-        self.validation_split_target_shape = new_validation_target_data.shape
+        log_information(
+            "Validation data split Input tensor shape: {}".format(
+                new_validation_input_data.shape
+            )
+        )
+        log_information(
+            "Validation data split Target tensor shape: {}".format(
+                new_validation_target_data.shape
+            )
+        )
         del self.new_validation_data
         (
             new_test_input_data,
             new_test_target_data,
         ) = self.extract_input_target_data(self.new_test_data)
+        log_information(
+            "Test data split Input tensor shape: {}".format(new_test_input_data.shape)
+        )
+        log_information(
+            "Test data split Target tensor shape: {}".format(new_test_target_data.shape)
+        )
         del self.new_test_data
-        self.test_split_input_shape = new_test_input_data.shape
-        self.test_split_target_shape = new_test_target_data.shape
+        self.original_test_input_data = self.extract_input_target_data(
+            self.original_test_data
+        )
+        log_information(
+            "Original Test Input tensor shape: {}".format(
+                self.original_test_input_data.shape
+            )
+        )
+        del self.original_test_data
+        log_information("")
 
         # Shuffles input and target data. Converts into tensorflow datasets.
         self.test_dataset = self.combine_shuffle_slice_dataset(
             new_test_input_data, new_test_target_data
         )
-        self.n_test_steps = len(new_test_input_data) // self.batch_size
+        n_test_steps = len(new_test_input_data) // self.batch_size
         del new_test_input_data, new_test_target_data
         self.validation_dataset = self.combine_shuffle_slice_dataset(
             new_validation_input_data, new_validation_target_data
         )
-        self.n_validation_steps = len(new_validation_input_data) // self.batch_size
+        n_validation_steps = len(new_validation_input_data) // self.batch_size
         del new_validation_input_data, new_validation_target_data
         self.train_dataset = self.combine_shuffle_slice_dataset(
-            new_train_input_data, new_test_target_data
+            new_train_input_data, new_train_target_data
         )
-        self.n_train_steps = len(new_train_input_data) // self.batch_size
+        n_train_steps = len(new_train_input_data) // self.batch_size
+        log_information("No. of Training steps per epoch: {}".format(n_train_steps))
+        log_information(
+            "No. of Validation steps per epoch: {}".format(n_validation_steps)
+        )
+        log_information("No. of Testing steps per epoch: {}".format(n_test_steps))
+        log_information("")
         del new_train_input_data, new_train_target_data
