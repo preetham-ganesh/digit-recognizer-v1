@@ -187,3 +187,10 @@ class LoadTrainValidateModel:
         # Computes mean for loss & accuracy.
         self.validation_loss(batch_loss)
         self.validation_accuracy(batch_accuracy)
+
+    def reset_metrics(self) -> None:
+        """Resets states for training and validation metrics before the start of each epoch."""
+        self.train_loss.reset_states()
+        self.validation_loss.reset_states()
+        self.train_accuracy.reset_states()
+        self.validation_accuracy.reset_states()
