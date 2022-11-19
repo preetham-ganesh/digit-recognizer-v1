@@ -125,3 +125,12 @@ class LoadTrainValidateModel:
             ),
             index=False,
         )
+
+    def preprocess_input_batch(self, input_batch: int) -> tf.Tensor:
+        """Processes input batch normalizing the pixel value range, and type casting them to float32 type."""
+        # Casts input and target batches to float32 type.
+        input_batch = tf.cast(input_batch, dtype=tf.float32)
+
+        # Normalizes the input and target batches from [0, 255] range to [0, 1] range.
+        input_batch = input_batch / 255.0
+        return input_batch
