@@ -4,6 +4,7 @@
 import os
 
 import tensorflow as tf
+import pandas as pd
 
 from src.model import DigitRecognizer
 from src.utils import log_information
@@ -31,10 +32,23 @@ class LoadTrainValidateModel:
         ), "Variable batch_size should be between 0 & 257 (not included)."
 
         # Initalizes class variables.
+        self.home_directory_path = os.getcwd()
         self.model_version = model_version
         self.model_configuration = model_configuration
         self.model_configuration["batch_size"] = batch_size
-        self.home_directory_path = os.getcwd()
+        self.train_loss = tf.keras.metrics.Mean(name="train_loss")
+        self.validation_loss = tf.keras.metrics.Mean(name="validation_loss")
+        self.train_accuracy = tf.keras.metrics.Mean(name="train_accuracy")
+        self.validation_accuracy = tf.keras.metrics.Mean(name="validation_accuracy")
+        self.model_history = pd.DataFrame(
+            columns=[
+                "epochs",
+                "train_loss",
+                "validation_loss",
+                "train_accuracy",
+                "validation_accuracy",
+            ]
+        )
 
     def load_model(self) -> None:
         """Loads model & other utilies for training it."""
@@ -71,7 +85,7 @@ class LoadTrainValidateModel:
         # Plots the model and saves it as a PNG file.
         tf.keras.utils.plot_model(
             self.model.build_graph(),
-            "{}/plots/v{}.png".format(
+            "{}/reports/v{}/model_plot.png".format(
                 self.home_directory_path, self.model_configuration["model_version"]
             ),
             show_shapes=True,
@@ -79,8 +93,35 @@ class LoadTrainValidateModel:
             expand_nested=False,
         )
         log_information(
-            "Model Plot saved at {}/plots/v{}.png.".format(
+            "Model Plot saved at {}/reports/v{}/model_plot.png.".format(
                 self.home_directory_path, self.model_configuration["model_version"]
             )
         )
         log_information("")
+
+    def update_model_history(self, epoch: int) -> None:
+        """Updates model history dataframe with latest metrics & saves it as CSV file."""
+        # Asserts type & value of the arguments.
+        assert isinstance(epoch, str), "Variable epoch should be of type 'int'."
+
+        # Updates the metrics dataframe with the metrics for the current training & validation metrics.
+        history_dictionary = {
+            "epochs": int(epoch + 1),
+            "train_loss": str(round(self.train_loss.result().numpy(), 3)),
+            "validation_loss": str(round(self.validation_loss.result().numpy(), 3)),
+            "train_accuracy": str(round(self.train_accuracy.result().numpy(), 3)),
+            "validation_accuracy": str(
+                round(self.validation_accuracy.result().numpy(), 3)
+            ),
+        }
+        self.model_history = self.model_history.append(
+            history_dictionary, ignore_index=True
+        )
+
+        # Saves history dataframe on as a CSV file.
+        self.model_history.to_csv(
+            "{}/reports/v{}/history.csv".format(
+                self.home_directory_path, self.model_version
+            ),
+            index=False,
+        )
