@@ -138,8 +138,14 @@ class LoadTrainValidateModel:
     def loss_function(
         self, target_batch: tf.Tensor, predicted_batch: tf.Tensor
     ) -> tf.Tensor:
-        """Computes the loss value for the current predicted batch based on comparison with actual batch."""
-        # Creates the loss object for the Categorical Crossentropy & computes loss using the target and predicted batches.
+        """Computes loss for the current batch using actual values and predicted values."""
         loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
         current_loss = loss_object(target_batch, predicted_batch)
         return current_loss
+
+    def accuracy_function(
+        self, target_batch: tf.Tensor, predicted_batch: tf.Tensor
+    ) -> tf.Tensor:
+        """Computes accuracy for the current batch using actual values and predicted values."""
+        accuracy = tf.keras.metrics.categorical_accuracy(target_batch, predicted_batch)
+        return tf.reduce_mean(accuracy)
