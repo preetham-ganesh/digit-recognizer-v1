@@ -134,3 +134,12 @@ class LoadTrainValidateModel:
         # Normalizes the input and target batches from [0, 255] range to [0, 1] range.
         input_batch = input_batch / 255.0
         return input_batch
+
+    def loss_function(
+        self, target_batch: tf.Tensor, predicted_batch: tf.Tensor
+    ) -> tf.Tensor:
+        """Computes the loss value for the current predicted batch based on comparison with actual batch."""
+        # Creates the loss object for the Categorical Crossentropy & computes loss using the target and predicted batches.
+        loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
+        current_loss = loss_object(target_batch, predicted_batch)
+        return current_loss
