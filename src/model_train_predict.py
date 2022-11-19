@@ -12,10 +12,28 @@ from src.utils import log_information
 class LoadTrainValidateModel:
     """"""
 
-    def __init__(self, model_version: str, model_configuration: dict) -> None:
-        """"""
+    def __init__(
+        self, model_version: str, model_configuration: dict, batch_size: int
+    ) -> None:
+        """Creates object for the Dataset class."""
+        # Asserts type & value of the arguments.
+        assert isinstance(
+            model_version, str
+        ), "Variable model_version should be of type 'str'."
+        assert isinstance(
+            model_configuration, dict
+        ), "Variable model_configuration should be of type 'dict'."
+        assert isinstance(
+            batch_size, int
+        ), "Variable batch_size should be of type 'int'."
+        assert (
+            batch_size > 0 and batch_size < 257
+        ), "Variable batch_size should be between 0 & 257 (not included)."
+
+        # Initalizes class variables.
         self.model_version = model_version
         self.model_configuration = model_configuration
+        self.model_configuration["batch_size"] = batch_size
         self.home_directory_path = os.getcwd()
 
     def load_model(self) -> None:
@@ -47,16 +65,22 @@ class LoadTrainValidateModel:
             self.model_configuration["n_channels"],
         )
         _ = self.model.build((self.model_configuration["batch_size"], *input_dim))
-        log_information(self.model.summary())
+        log_information(str(self.model.summary()))
         log_information("")
 
         # Plots the model and saves it as a PNG file.
         tf.keras.utils.plot_model(
             self.model.build_graph(),
-            "{}/results/v{}/utils/model_plot.png".format(
+            "{}/plots/v{}.png".format(
                 self.home_directory_path, self.model_configuration["model_version"]
             ),
             show_shapes=True,
             show_layer_names=True,
             expand_nested=False,
         )
+        log_information(
+            "Model Plot saved at {}/plots/v{}.png.".format(
+                self.home_directory_path, self.model_configuration["model_version"]
+            )
+        )
+        log_information("")
