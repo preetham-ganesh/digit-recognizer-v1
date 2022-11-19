@@ -149,3 +149,25 @@ class LoadTrainValidateModel:
         """Computes accuracy for the current batch using actual values and predicted values."""
         accuracy = tf.keras.metrics.categorical_accuracy(target_batch, predicted_batch)
         return tf.reduce_mean(accuracy)
+
+    @tf.function
+    def train_step(self, input_batch: tf.Tensor, target_batch: tf.Tensor) -> None:
+        """Train the current model using current input & target batches."""
+        # Processes input batch for training the model.
+        input_batch = self.preprocess_input_batch(input_batch)
+
+        # Computes masked images for all input images in the batch, and computes batch loss.
+        with tf.GradientTape() as tape:
+            predicted_batch = self.model(input_batch, True)
+            batch_loss = self.loss_function(target_batch, predicted_batch)
+
+        # Computes gradients using loss & model variables. Apply the computed gradients on model variables using optimizer.
+        gradients = tape.gradient(batch_loss, self.model.trainable_variables)
+        self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
+
+        # Computes accuracy score for the current batch.
+        batch_accuracy = self.accuracy_function(target_batch, predicted_batch)
+
+        # Computes mean for loss and accuracy.
+        self.train_loss(batch_loss)
+        self.train_accuracy(batch_accuracy)
