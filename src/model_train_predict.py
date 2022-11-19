@@ -16,7 +16,7 @@ class LoadTrainValidateModel:
     def __init__(
         self, model_version: str, model_configuration: dict, batch_size: int
     ) -> None:
-        """Creates object for the Dataset class."""
+        """Creates object for the LoadTrainValidateModel class."""
         # Asserts type & value of the arguments.
         assert isinstance(
             model_version, str
@@ -171,3 +171,19 @@ class LoadTrainValidateModel:
         # Computes mean for loss and accuracy.
         self.train_loss(batch_loss)
         self.train_accuracy(batch_accuracy)
+
+    def validation_step(self, input_batch: tf.Tensor, target_batch: tf.Tensor) -> None:
+        """Validates the model using the current input and target batches"""
+        # Processes input batch for validating the model.
+        input_batch = self.process_input_batch(input_batch)
+
+        # Computes masked images for all input images in the batch.
+        predicted_batch = self.model(input_batch, False)
+
+        # Computes loss & accuracy for the target batch and predicted batch.
+        batch_loss = self.loss_function(target_batch, predicted_batch)
+        batch_accuracy = self.accuracy_function(target_batch, predicted_batch)
+
+        # Computes mean for loss & accuracy.
+        self.validation_loss(batch_loss)
+        self.validation_accuracy(batch_accuracy)
