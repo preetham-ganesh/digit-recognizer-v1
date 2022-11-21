@@ -5,6 +5,7 @@ import os
 
 import tensorflow as tf
 import pandas as pd
+import time
 
 from src.model import DigitRecognizer
 from src.utils import log_information
@@ -14,7 +15,13 @@ class LoadTrainValidateModel:
     """"""
 
     def __init__(
-        self, model_version: str, model_configuration: dict, batch_size: int
+        self,
+        model_version: str,
+        model_configuration: dict,
+        batch_size: int,
+        n_train_steps_per_epoch: int,
+        n_validation_steps_per_epoch: int,
+        n_test_steps_per_epoch: int,
     ) -> None:
         """Creates object for the LoadTrainValidateModel class."""
         # Asserts type & value of the arguments.
@@ -30,6 +37,15 @@ class LoadTrainValidateModel:
         assert (
             batch_size > 0 and batch_size < 257
         ), "Variable batch_size should be between 0 & 257 (not included)."
+        assert isinstance(
+            n_train_steps_per_epoch, int
+        ), "Variable n_train_steps_per_epoch should be of type 'int'."
+        assert isinstance(
+            n_validation_steps_per_epoch, int
+        ), "Variable n_validation_steps_per_epoch should be of type 'int'."
+        assert isinstance(
+            n_test_steps_per_epoch, int
+        ), "Variable n_test_steps_per_epoch should be of type 'int'."
 
         # Initalizes class variables.
         self.home_directory_path = os.getcwd()
@@ -40,6 +56,9 @@ class LoadTrainValidateModel:
         self.validation_loss = tf.keras.metrics.Mean(name="validation_loss")
         self.train_accuracy = tf.keras.metrics.Mean(name="train_accuracy")
         self.validation_accuracy = tf.keras.metrics.Mean(name="validation_accuracy")
+        self.n_train_steps_per_epoch = n_train_steps_per_epoch
+        self.n_validation_steps_per_epoch = n_validation_steps_per_epoch
+        self.n_test_steps_per_epoch = 
         self.model_history = pd.DataFrame(
             columns=[
                 "epochs",
@@ -194,3 +213,24 @@ class LoadTrainValidateModel:
         self.validation_loss.reset_states()
         self.train_accuracy.reset_states()
         self.validation_accuracy.reset_states()
+
+    def train_model_per_epoch(self, train_dataset: tf.data.Dataset, current_epoch: int) -> None:
+        """Trains the model using the current train dataset."""
+        # Iterates across batches in the train dataset.
+        for (batch, (input_batch, target_batch)) in enumerate(train_dataset.take(self.n_train_steps_per_epoch)):
+            batch_start_time = time.time()
+
+            # Trains the model using the current input and target batch.
+            self.train_step(input_batch, target_batch)
+            batch_end_time = time.time()
+            if batch % 10 == 0:
+                log_information(
+                    "Epoch={}, Batch={}, Train loss={}, Train accuracy={}, Time taken={} sec.".format(
+                        current_epoch + 1,
+                        batch,
+                        str(round(self.train_loss.result().numpy(), 3)),
+                        str(round(self.train_accuracy.result().numpy(), 3)),
+                        round(batch_end_time - batch_start_time, 3),
+                    )
+                )
+        log_information("")
