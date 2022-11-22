@@ -58,7 +58,7 @@ class LoadTrainValidateModel:
         self.validation_accuracy = tf.keras.metrics.Mean(name="validation_accuracy")
         self.n_train_steps_per_epoch = n_train_steps_per_epoch
         self.n_validation_steps_per_epoch = n_validation_steps_per_epoch
-        self.n_test_steps_per_epoch = 
+        self.n_test_steps_per_epoch = n_test_steps_per_epoch
         self.model_history = pd.DataFrame(
             columns=[
                 "epochs",
@@ -214,10 +214,14 @@ class LoadTrainValidateModel:
         self.train_accuracy.reset_states()
         self.validation_accuracy.reset_states()
 
-    def train_model_per_epoch(self, train_dataset: tf.data.Dataset, current_epoch: int) -> None:
+    def train_model_per_epoch(
+        self, train_dataset: tf.data.Dataset, current_epoch: int
+    ) -> None:
         """Trains the model using the current train dataset."""
         # Iterates across batches in the train dataset.
-        for (batch, (input_batch, target_batch)) in enumerate(train_dataset.take(self.n_train_steps_per_epoch)):
+        for (batch, (input_batch, target_batch)) in enumerate(
+            train_dataset.take(self.n_train_steps_per_epoch)
+        ):
             batch_start_time = time.time()
 
             # Trains the model using the current input and target batch.
@@ -230,6 +234,31 @@ class LoadTrainValidateModel:
                         batch,
                         str(round(self.train_loss.result().numpy(), 3)),
                         str(round(self.train_accuracy.result().numpy(), 3)),
+                        round(batch_end_time - batch_start_time, 3),
+                    )
+                )
+        log_information("")
+
+    def validate_model_per_epoch(
+        self, validation_dataset: tf.data.Dataset, current_epoch: int
+    ) -> None:
+        """Validates the model using the current validation dataset."""
+        # Iterates across batches in the validation dataset.
+        for (batch, (input_batch, target_batch)) in enumerate(
+            validation_dataset.take(self.n_validation_steps_per_epoch)
+        ):
+            batch_start_time = time.time()
+
+            # Validates the model using the current input and target batch.
+            self.validation_step(input_batch, target_batch)
+            batch_end_time = time.time()
+            if batch % 10 == 0:
+                log_information(
+                    "Epoch={}, Batch={}, Validation loss={}, Validation accuracy={}, Time taken={} sec.".format(
+                        current_epoch + 1,
+                        batch,
+                        str(round(self.validation_loss.result().numpy(), 3)),
+                        str(round(self.validation_accuracy.result().numpy(), 3)),
                         round(batch_end_time - batch_start_time, 3),
                     )
                 )
