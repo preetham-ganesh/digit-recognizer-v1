@@ -16,6 +16,13 @@ class DigitRecognizer(tf.keras.Model):
         """Initializes the layers in the recognition model, by adding convolutional, pooling, dropout & dense layers."""
 
         super(DigitRecognizer, self).__init__()
+
+        # Asserts type of input arguments.
+        assert isinstance(
+            model_configuration, dict
+        ), "Variable model_configuration should be of type 'dict'."
+
+        # Initializes class variables.
         self.model_configuration = model_configuration
         self.model_layers = dict()
 
@@ -69,6 +76,22 @@ class DigitRecognizer(tf.keras.Model):
 
     def call(self, x: tf.Tensor, training: bool) -> tf.Tensor:
         """Input tensor is passed through the layers in the encoder model."""
+        # Asserts type & values of the input arguments.
+        assert isinstance(x, tf.Tensor), "Variable x should be of type 'tf.Tensor'."
+        assert isinstance(training, bool), "Variable training should be of type 'bool'."
+        assert (
+            x.shape[1] == self.model_configuration["final_image_size"]
+            and x.shape[2] == self.model_configuration["final_image_size"]
+            and x.shape[3] == self.model_configuration["n_channels"]
+        ), "Variable x should be of shape (None, {}, {}, {}).".format(
+            self.model_configuration["final_image_size"],
+            self.model_configuration["final_image_size"],
+            self.model_configuration["n_channels"],
+        )
+        assert (
+            training == True or training == False
+        ), "Variable training should be either 'True' or 'False'."
+
         # Iterates across the layers arrangement, and predicts the output for each layer.
         for layer_index in range(
             self.model_configuration["layers_start_index"],
