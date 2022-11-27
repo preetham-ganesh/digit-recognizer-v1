@@ -59,7 +59,7 @@ class TrainValidateModel:
         self.n_train_steps_per_epoch = n_train_steps_per_epoch
         self.n_validation_steps_per_epoch = n_validation_steps_per_epoch
         self.n_test_steps_per_epoch = n_test_steps_per_epoch
-        self.checkpoint_count = 0
+        self.patience_count = 0
         self.best_validation_loss = None
         self.model_history = pd.DataFrame(
             columns=[
@@ -77,16 +77,16 @@ class TrainValidateModel:
         self.model = DigitRecognizer(self.model_configuration)
 
         # Creates checkpoint manager for the neural network model and loads the optimizer.
-        checkpoint_directory_path = "{}/checkpoints/v{}".format(
+        self.checkpoint_directory_path = "{}/checkpoints/v{}".format(
             self.home_directory_path, self.model_version
         )
         self.optimizer = tf.keras.optimizers.Adam(
             learning_rate=self.model_configuration["learning_rate"]
         )
         checkpoint = tf.train.Checkpoint(optimizer=self.optimizer, model=self.model)
-        checkpoint.restore(tf.train.latest_checkpoint(checkpoint_directory_path))
+        checkpoint.restore(tf.train.latest_checkpoint(self.checkpoint_directory_path))
         self.manager = tf.train.CheckpointManager(
-            checkpoint, directory=checkpoint_directory_path, max_to_keep=3
+            checkpoint, directory=self.checkpoint_directory_path, max_to_keep=3
         )
         log_information("Finished loading model for current configuration.")
         log_information("")
@@ -320,5 +320,48 @@ class TrainValidateModel:
                 )
         log_information("")
 
-    def early_stopping(self) -> None:
-        """"""
+    def early_stopping(self) -> bool:
+        """Stops the model from learning further if the performance has not improved from previous epoch."""
+        # If epoch = 1, then best validation loss is replaced with current validation loss, & the checkpoint is saved.
+        if self.best_validation_loss is None:
+            self.patience_count = 0
+            self.best_validation_loss = str(
+                round(self.validation_loss.result().numpy(), 3)
+            )
+            self.manager.save()
+            log_information(
+                "Checkpoint saved at {}.".format(self.checkpoint_directory_path)
+            )
+
+        # If best validation loss is higher than current validation loss, the best validation loss is replaced with
+        # current validation loss, & the checkpoint is saved.
+        elif self.best_validation_loss > str(
+            round(self.validation_loss.result().numpy(), 3)
+        ):
+            self.patience_count = 0
+            log_information(
+                "Best validation loss changed from {} to {}".format(
+                    str(self.best_validation_loss),
+                    str(round(self.validation_loss.result().numpy(), 3)),
+                )
+            )
+            self.best_validation_loss = str(
+                round(self.validation_loss.result().numpy(), 3)
+            )
+            self.manager.save()
+            log_information(
+                "Checkpoint saved at {}".format(self.checkpoint_directory_path)
+            )
+
+        # If best validation loss is not higher than the current validation loss, then the number of times the model
+        # has not improved is incremented by 1.
+        elif self.patience_count <= 4:
+            self.patience_count += 1
+            log_information("Best validation loss did not improve.")
+            log_information("Checkpoint not saved.")
+
+        # If the number of times the model did not improve is greater than 4, then model is stopped from training
+        # further.
+        else:
+            return False
+        return True
