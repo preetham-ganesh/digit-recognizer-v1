@@ -6,6 +6,8 @@ import os
 import tensorflow as tf
 import pandas as pd
 import time
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
 
 from src.model import DigitRecognizer
 from src.utils import log_information
@@ -365,3 +367,52 @@ class TrainValidateModel:
         else:
             return False
         return True
+
+    def generate_model_history_plot(self, metric_name: str) -> None:
+        """Generates plot for model training and validation history."""
+        # Specifications used to generate the plot, i.e., font size and size of the plot.
+        font = {"size": 28}
+        plt.rc("font", **font)
+        figure(num=None, figsize=(30, 15))
+
+        # Converts train and validation metrics from string format to floating point format.
+        epochs = [i for i in range(1, len(self.model_history) + 1)]
+        train_metrics = list(self.model_history["train_{}".format(metric_name)])
+        train_metrics = [float(train_metrics[i]) for i in range(len(train_metrics))]
+        validation_metrics = list(
+            self.model_history["validation_{}".format(metric_name)]
+        )
+        validation_metrics = [
+            float(validation_metrics[i]) for i in range(len(validation_metrics))
+        ]
+
+        # Generates plot for training and validation metrics
+        plt.plot(
+            epochs,
+            train_metrics,
+            color="orange",
+            linewidth=3,
+            label="train_{}".format(metric_name),
+        )
+        plt.plot(
+            epochs,
+            validation_metrics,
+            color="blue",
+            linewidth=3,
+            label="validation_{}".format(metric_name),
+        )
+
+        # Generates the plot for the epochs vs metrics.
+        plt.xlabel("epochs")
+        plt.ylabel(metric_name)
+        plt.xticks(epochs)
+        plt.legend(loc="upper left")
+        plt.grid(color="black", linestyle="-.", linewidth=2, alpha=0.3)
+
+        # Saves plot using the following path.
+        plt.savefig(
+            "{}/results/v{}/utils/model_history_{}.png".format(
+                self.home_directory_path, self.model_version, metric_name
+            )
+        )
+        plt.close()
