@@ -4,15 +4,15 @@ Author: [Preetham Ganesh](https://www.linkedin.com/in/preethamganesh/)
 
 ## Contents
 
-- [Description](https://github.com/preetham-ganesh/forecast-of-rainfall-quantity#description)
-- [Dataset](https://github.com/preetham-ganesh/forecast-of-rainfall-quantity#dataset)
-- [Usage](https://github.com/preetham-ganesh/forecast-of-rainfall-quantity#usage)
-	- [Requirement Installation](https://github.com/preetham-ganesh/forecast-of-rainfall-quantity#requirement-installment)
-	- [Model Training and Testing](https://github.com/preetham-ganesh/forecast-of-rainfall-quantity#model-training-and-testing)
-	- [How to run the application?](https://github.com/preetham-ganesh/forecast-of-rainfall-quantity#how-to-run-the-application?)
-- [Future Work](https://github.com/preetham-ganesh/forecast-of-rainfall-quantity#future-work)
-- [Support](https://github.com/preetham-ganesh/forecast-of-rainfall-quantity#support)
-- [License](https://github.com/preetham-ganesh/forecast-of-rainfall-quantity#license)
+- [Description](https://github.com/preetham-ganesh/digit-recognizer-v1#description)
+- [Dataset](https://github.com/preetham-ganesh/digit-recognizer-v1#dataset)
+- [Usage](https://github.com/preetham-ganesh/digit-recognizer-v1#usage)
+  - [Requirement Installation](https://github.com/preetham-ganesh/digit-recognizer-v1#requirement-installment)
+  - [Model Training and Testing](https://github.com/preetham-ganesh/digit-recognizer-v1#model-training-and-testing)
+  - [How to run the application?](https://github.com/preetham-ganesh/digit-recognizer-v1#how-to-run-the-application?)
+- [Future Work](https://github.com/preetham-ganesh/digit-recognizer-v1#future-work)
+- [Support](https://github.com/preetham-ganesh/digit-recognizer-v1#support)
+- [License](https://github.com/preetham-ganesh/digit-recognizer-v1#license)
 
 ## Description
 
@@ -35,8 +35,8 @@ Requires: Python 3.6.
 
 ```bash
 # Clone this repository
-git clone https://github.com/preetham-ganesh/digit-recognizer.git
-cd digit-recognizer
+git clone https://github.com/preetham-ganesh/digit-recognizer-v1.git
+cd digit-recognizer-v1
 
 # Create a Conda environment with dependencies
 conda env create -f environment.yml
@@ -47,7 +47,7 @@ pip install -r requirements.txt
 ### Model Training and Testing
 
 - Two types of models can be trained using the repository.
-- The configuration dictionary in the model_training_testing.py code file has a key called 'model,' which can take values as either 1 or 2. 
+- The configuration dictionary in the model_training_testing.py code file has a key called 'model,' which can take values as either 1 or 2.
 - It can be changed by providing an argument while training the models.
 
 ```bash
@@ -74,7 +74,7 @@ A video demonstration on how to run the application is shown below:
 
 ## Support
 
-For any queries regarding the repository contact 'preetham.ganesh2015@gmail.com'.
+For any queries regarding the repository contact 'preetham.ganesh2021@gmail.com'.
 
 ## License
 
